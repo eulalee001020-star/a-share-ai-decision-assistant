@@ -4,9 +4,9 @@
 
 > 本项目只做研究、计划和风险提示，不自动下单，不承诺收益，不构成投资建议。
 
-## 作品集入口
+## 项目入口
 
-- 产品案例：[AI 产品经理作品集说明](docs/portfolio.md)
+- 产品案例：[Product Case Study](docs/portfolio.md)
 - 互动 Demo：[期望 R 与仓位权限 Demo](docs/demo/index.html)
 - 工作流说明：[Runbook](docs/runbook.md)
 - 数据与证据边界：[Data Source Requirements](docs/data_sources.md)
@@ -83,7 +83,7 @@ flowchart LR
 .
 ├── config/portfolio.example.json      # 脱敏样例组合
 ├── docs/
-│   ├── portfolio.md                   # 面试作品集案例
+│   ├── portfolio.md                   # 产品案例说明
 │   ├── demo/index.html                # 可互动 Demo
 │   ├── data_sources.md                # 数据分层与证据要求
 │   ├── prediction_automation_system.md
