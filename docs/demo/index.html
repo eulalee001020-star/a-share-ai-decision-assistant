@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A-Share AI Decision Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --line: #d8dde6;
+      --text: #172033;
+      --muted: #5c667a;
+      --blue: #2563eb;
+      --green: #15803d;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --ink: #111827;
+      --soft-blue: #e8f0ff;
+      --soft-green: #e7f6ed;
+      --soft-amber: #fff3da;
+      --soft-red: #fee8e8;
+      --shadow: 0 10px 24px rgba(23, 32, 51, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    header {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    section, aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    aside {
+      padding: 16px;
+      align-self: start;
+      position: sticky;
+      top: 82px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    button:hover { filter: brightness(.98); }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 22px;
+    }
+
+    label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .value {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
+      min-width: 44px;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      padding: 0 10px;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .switches {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .switch {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      min-height: 58px;
+      background: #fff;
+    }
+
+    .switch input {
+      margin: 0 6px 0 0;
+      accent-color: var(--blue);
+    }
+
+    .switch strong {
+      font-size: 13px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .switch span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      min-height: 98px;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .kpi .metric {
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 780;
+      font-variant-numeric: tabular-nums;
+      word-break: break-word;
+    }
+
+    .kpi .note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 680;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tag.blue { background: var(--soft-blue); color: var(--blue); border-color: #bed2ff; }
+    .tag.green { background: var(--soft-green); color: var(--green); border-color: #bfe8cb; }
+    .tag.amber { background: var(--soft-amber); color: var(--amber); border-color: #fed996; }
+    .tag.red { background: var(--soft-red); color: var(--red); border-color: #ffc6c6; }
+
+    .visuals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 260px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 680;
+      background: #fafbfc;
+    }
+
+    td.num, th.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .summary-box h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .summary-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .code-output {
+      white-space: pre-wrap;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #0f172a;
+      color: #e5e7eb;
+      font-size: 12px;
+      line-height: 1.55;
+      min-height: 186px;
+      overflow: auto;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+      }
+
+      .kpis, .visuals, .decision {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        align-items: flex-start;
+        height: auto;
+        padding: 14px 16px;
+        flex-direction: column;
+      }
+
+      .header-meta {
+        flex-wrap: wrap;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>A-Share AI Decision Console</h1>
+    <div class="header-meta">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span id="clock">Asia/Shanghai</span>
+      <span class="tag blue">Human-in-the-loop</span>
+      <span class="tag amber">No auto-trading</span>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="panel-title">
+        <h2>输入</h2>
+        <div class="toolbar">
+          <button class="primary" id="sampleBtn" type="button">样例</button>
+          <button id="resetBtn" type="button">重置</button>
+        </div>
+      </div>
+
+      <div class="switches">
+        <label class="switch">
+          <input id="a1" type="checkbox" checked>
+          <strong>A1</strong>
+          <span>报价 分时 均线</span>
+        </label>
+        <label class="switch">
+          <input id="a2" type="checkbox">
+          <strong>A2</strong>
+          <span>竞价 队列 封单</span>
+        </label>
+        <label class="switch">
+          <input id="b1" type="checkbox" checked>
+          <strong>B1</strong>
+          <span>广度 板块 情绪</span>
+        </label>
+      </div>
+
+      <div class="field">
+        <div class="field-row"><label for="indexScore">指数与成交</label><span class="value" id="indexScoreValue"></span></div>
+        <input id="indexScore" type="range" min="-2" max="2" value="1" step="1">
+      </div>
+      <div class="field">
+        <div class="field-row"><label for="breadthScore">市场广度</label><span class="value" id="breadthScoreValue"></span></div>
+        <input id="breadthScore" type="range" min="-2" max="2" value="0" step="1">
+      </div>
+      <div class="field">
+        <div class="field-row"><label for="sentimentScore">情绪接力</label><span class="value" id="sentimentScoreValue"></span></div>
+        <input id="sentimentScore" type="range" min="-2" max="2" value="-1" step="1">
+      </div>
+      <div class="field">
+        <div class="field-row"><label for="mainlineScore">主线结构</label><span class="value" id="mainlineScoreValue"></span></div>
+        <input id="mainlineScore" type="range" min="-2" max="2" value="1" step="1">
+      </div>
+      <div class="field">
+        <div class="field-row"><label for="lossScore">亏钱效应</label><span class="value" id="lossScoreValue"></span></div>
+        <input id="lossScore" type="range" min="-2" max="2" value="0" step="1">
+      </div>
+
+      <div class="grid-two">
+        <div class="field">
+          <label for="assets">总资产 CNY</label>
+          <input id="assets" type="number" min="1000" value="100000">
+        </div>
+        <div class="field">
+          <label for="riskPct">单笔风险 %</label>
+          <input id="riskPct" type="number" min="0.1" max="10" value="2" step="0.1">
+        </div>
+        <div class="field">
+          <label for="positionPct">当前仓位 %</label>
+          <input id="positionPct" type="number" min="0" max="100" value="38" step="1">
+        </div>
+        <div class="field">
+          <label for="stopDistance">止损距离 %</label>
+          <input id="stopDistance" type="number" min="0.1" max="20" value="2" step="0.1">
+        </div>
+      </div>
+
+      <div class="grid-two">
+        <div class="field">
+          <label for="success">成功概率 %</label>
+          <input id="success" type="number" min="0" max="100" value="42" step="1">
+        </div>
+        <div class="field">
+          <label for="failure">失败概率 %</label>
+          <input id="failure" type="number" min="0" max="100" value="34" step="1">
+        </div>
+        <div class="field">
+          <label for="noise">噪音概率 %</label>
+          <input id="noise" type="number" min="0" max="100" value="24" step="1">
+        </div>
+        <div class="field">
+          <label for="targetR">目标 R</label>
+          <input id="targetR" type="number" min="0" max="5" value="1.8" step="0.1">
+        </div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <section class="panel">
+        <div class="panel-title">
+          <h2>实时判定</h2>
+          <span class="small">样例股票：通富微电 002156.SZ</span>
+        </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">数据等级</div>
+            <div class="metric" id="gradeMetric">B</div>
+            <div class="note" id="permissionNote">缺A2竞价，禁止追强</div>
+          </div>
+          <div class="kpi">
+            <div class="label">市场状态</div>
+            <div class="metric" id="regimeMetric">混沌</div>
+            <div class="note" id="regimeNote">总分 1</div>
+          </div>
+          <div class="kpi">
+            <div class="label">期望 R</div>
+            <div class="metric" id="expectedMetric">0.37</div>
+            <div class="note" id="expectedNote">允许观察确认</div>
+          </div>
+          <div class="kpi">
+            <div class="label">仓位上限</div>
+            <div class="metric" id="capMetric">20%</div>
+            <div class="note" id="capNote">由止损距离倒推</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h2>证据图</h2>
+          <span class="small">市场状态与概率结构</span>
+        </div>
+        <div class="visuals">
+          <canvas id="scoreCanvas" width="600" height="320" aria-label="市场状态评分图"></canvas>
+          <canvas id="probCanvas" width="600" height="320" aria-label="概率与收益结构图"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h2>执行输出</h2>
+          <span id="actionTag" class="tag amber">First-five-minute confirmation</span>
+        </div>
+        <div class="decision">
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>类型</th>
+                  <th>触发条件</th>
+                  <th>动作</th>
+                  <th class="num">上限</th>
+                  <th>取消条件</th>
+                </tr>
+              </thead>
+              <tbody id="executionRows"></tbody>
+            </table>
+          </div>
+          <div class="summary-box">
+            <h3>不交易条件</h3>
+            <ul id="doNotTrade"></ul>
+          </div>
+        </div>
+        <pre class="code-output" id="jsonOutput"></pre>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const ids = [
+      "a1", "a2", "b1", "indexScore", "breadthScore", "sentimentScore", "mainlineScore", "lossScore",
+      "assets", "riskPct", "positionPct", "stopDistance", "success", "failure", "noise", "targetR"
+    ];
+
+    const scoreLabels = [
+      ["indexScore", "指数与成交"],
+      ["breadthScore", "市场广度"],
+      ["sentimentScore", "情绪接力"],
+      ["mainlineScore", "主线结构"],
+      ["lossScore", "亏钱效应"]
+    ];
+
+    const sample = {
+      a1: true, a2: false, b1: true,
+      indexScore: 1, breadthScore: 0, sentimentScore: -1, mainlineScore: 1, lossScore: 0,
+      assets: 100000, riskPct: 2, positionPct: 38, stopDistance: 2,
+      success: 42, failure: 34, noise: 24, targetR: 1.8
+    };
+
+    const reset = {
+      a1: false, a2: false, b1: false,
+      indexScore: 0, breadthScore: 0, sentimentScore: 0, mainlineScore: 0, lossScore: 0,
+      assets: 100000, riskPct: 1, positionPct: 0, stopDistance: 3,
+      success: 35, failure: 40, noise: 25, targetR: 1.5
+    };
+
+    function el(id) { return document.getElementById(id); }
+    function num(id) { return Number(el(id).value || 0); }
+
+    function applyState(state) {
+      Object.entries(state).forEach(([key, value]) => {
+        const node = el(key);
+        if (!node) return;
+        if (node.type === "checkbox") node.checked = Boolean(value);
+        else node.value = value;
+      });
+      update();
+    }
+
+    function regimeFromScore(score) {
+      if (score >= 7) return ["强进攻", 90, "green"];
+      if (score >= 3) return ["轮动/修复", 60, "blue"];
+      if (score >= -2) return ["混沌", 40, "amber"];
+      if (score >= -6) return ["退潮", 35, "red"];
+      return ["强退潮", 25, "red"];
+    }
+
+    function dataGrade() {
+      const a1 = el("a1").checked;
+      const a2 = el("a2").checked;
+      const b1 = el("b1").checked;
+      if (a1 && a2 && b1) return ["A", "可输出概率、期望R和仓位上限", true];
+      if (a1 && b1) return ["B", "缺A2竞价，只能开盘确认，禁止追强", false];
+      if (a1) return ["C", "B1/A2缺失，只输出防守清单", false];
+      return ["D", "A1缺失，不给仓位建议", false];
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function calculate() {
+      const score = scoreLabels.reduce((sum, [id]) => sum + num(id), 0);
+      const [regime, regimeCap, regimeColor] = regimeFromScore(score);
+      const [grade, permission, fullPermission] = dataGrade();
+      const success = clamp(num("success") / 100, 0, 1);
+      const failure = clamp(num("failure") / 100, 0, 1);
+      const noise = clamp(num("noise") / 100, 0, 1);
+      const targetR = num("targetR");
+      const expectedR = success * targetR - failure - noise * 0.2;
+      const stopDistance = Math.max(num("stopDistance"), 0.1);
+      const riskPct = Math.max(num("riskPct"), 0);
+      const riskBasedCap = riskPct / stopDistance * 100;
+      const currentPosition = num("positionPct");
+      const maxPosition = clamp(Math.min(riskBasedCap, regimeCap - currentPosition), 0, 100);
+      let action = "观察";
+      let actionType = "observe";
+      let actionColor = "amber";
+
+      if (grade === "D" || grade === "C") {
+        action = "防守等待";
+        actionType = "defensive wait";
+        actionColor = "red";
+      } else if (!fullPermission && expectedR > 0) {
+        action = "09:30-09:35确认";
+        actionType = "first-five-minute confirmation";
+        actionColor = "amber";
+      } else if (fullPermission && expectedR > 0.25 && maxPosition > 0) {
+        action = "可小仓执行";
+        actionType = "open-executable";
+        actionColor = "green";
+      } else if (expectedR <= 0) {
+        action = "取消";
+        actionType = "cancel";
+        actionColor = "red";
+      }
+
+      return {
+        score, regime, regimeCap, regimeColor, grade, permission, fullPermission,
+        success, failure, noise, targetR, expectedR, riskBasedCap, currentPosition,
+        maxPosition, action, actionType, actionColor
+      };
+    }
+
+    function updateValues() {
+      scoreLabels.forEach(([id]) => {
+        el(id + "Value").textContent = num(id);
+      });
+    }
+
+    function drawScores(state) {
+      const canvas = el("scoreCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fbfcfe";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "24px system-ui, sans-serif";
+      ctx.fillStyle = "#172033";
+      ctx.fillText("市场状态评分", 28, 42);
+      const baseX = 170;
+      const zeroX = 330;
+      const rowH = 44;
+      scoreLabels.forEach(([id, label], index) => {
+        const y = 80 + index * rowH;
+        const score = num(id);
+        ctx.fillStyle = "#5c667a";
+        ctx.font = "18px system-ui, sans-serif";
+        ctx.fillText(label, 28, y + 8);
+        ctx.strokeStyle = "#d8dde6";
+        ctx.beginPath();
+        ctx.moveTo(baseX, y);
+        ctx.lineTo(520, y);
+        ctx.stroke();
+        ctx.fillStyle = score >= 0 ? "#15803d" : "#b91c1c";
+        const width = score * 70;
+        ctx.fillRect(zeroX, y - 12, width, 24);
+        ctx.fillStyle = "#172033";
+        ctx.fillText(String(score), zeroX + width + (score >= 0 ? 10 : -26), y + 8);
+      });
+      ctx.fillStyle = "#2563eb";
+      ctx.font = "bold 34px system-ui, sans-serif";
+      ctx.fillText(`总分 ${state.score}`, 28, 300);
+      ctx.fillStyle = "#5c667a";
+      ctx.font = "18px system-ui, sans-serif";
+      ctx.fillText(state.regime, 168, 300);
+    }
+
+    function drawProbabilities(state) {
+      const canvas = el("probCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fbfcfe";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "24px system-ui, sans-serif";
+      ctx.fillStyle = "#172033";
+      ctx.fillText("概率与收益结构", 28, 42);
+      const bars = [
+        ["成功", state.success, "#15803d"],
+        ["失败", state.failure, "#b91c1c"],
+        ["噪音", state.noise, "#b45309"]
+      ];
+      bars.forEach(([label, value, color], index) => {
+        const y = 86 + index * 58;
+        ctx.fillStyle = "#5c667a";
+        ctx.font = "18px system-ui, sans-serif";
+        ctx.fillText(label, 28, y + 18);
+        ctx.fillStyle = "#edf1f7";
+        ctx.fillRect(110, y, 390, 28);
+        ctx.fillStyle = color;
+        ctx.fillRect(110, y, 390 * value, 28);
+        ctx.fillStyle = "#172033";
+        ctx.fillText(`${Math.round(value * 100)}%`, 516, y + 20);
+      });
+      ctx.fillStyle = state.expectedR > 0 ? "#15803d" : "#b91c1c";
+      ctx.font = "bold 38px system-ui, sans-serif";
+      ctx.fillText(`${state.expectedR.toFixed(2)} R`, 28, 290);
+      ctx.fillStyle = "#5c667a";
+      ctx.font = "18px system-ui, sans-serif";
+      ctx.fillText("expected_r = success × targetR - failure - noise × 0.2", 190, 290);
+    }
+
+    function render(state) {
+      el("gradeMetric").textContent = state.grade;
+      el("permissionNote").textContent = state.permission;
+      el("regimeMetric").textContent = state.regime;
+      el("regimeNote").textContent = `总分 ${state.score}；状态仓位上限 ${state.regimeCap}%`;
+      el("expectedMetric").textContent = state.expectedR.toFixed(2);
+      el("expectedNote").textContent = state.expectedR > 0 ? "正期望，仍受数据权限约束" : "负期望，取消交易";
+      el("capMetric").textContent = `${state.maxPosition.toFixed(1)}%`;
+      el("capNote").textContent = `风险倒推上限 ${state.riskBasedCap.toFixed(1)}%`;
+      el("actionTag").textContent = state.actionType;
+      el("actionTag").className = `tag ${state.actionColor}`;
+
+      el("executionRows").innerHTML = `
+        <tr>
+          <td>${state.actionType}</td>
+          <td>09:35 站稳 VWAP，且板块龙头/中军不弱于跟风</td>
+          <td>${state.action}</td>
+          <td class="num">${state.maxPosition.toFixed(1)}%</td>
+          <td>跌回 VWAP、期望R转负、数据等级低于动作权限</td>
+        </tr>
+      `;
+
+      const blockers = [
+        state.grade !== "A" ? "缺 A2 竞价时不做追强动作" : "竞价强但开盘不能承接时取消",
+        state.expectedR <= 0 ? "期望 R 不为正" : "失败概率继续上升并压低期望 R",
+        state.maxPosition <= 0 ? "当前仓位已超过市场状态上限" : "止损距离扩大导致仓位上限不足",
+        "板块龙头走弱，跟风股强度降级",
+        "无法定义结构止损或不交易条件"
+      ];
+      el("doNotTrade").innerHTML = blockers.map(item => `<li>${item}</li>`).join("");
+
+      const output = {
+        data_grade: state.grade,
+        permission: state.permission,
+        regime: state.regime,
+        score: state.score,
+        expected_r: Number(state.expectedR.toFixed(3)),
+        action: state.action,
+        position_cap_pct: Number(state.maxPosition.toFixed(2)),
+        prediction_log_row: {
+          automation: "auction",
+          code: "002156.SZ",
+          event: "09:35站稳VWAP",
+          success_probability: Number(state.success.toFixed(2)),
+          failure_probability: Number(state.failure.toFixed(2)),
+          noise_probability: Number(state.noise.toFixed(2)),
+          target_r: state.targetR,
+          expected_r: Number(state.expectedR.toFixed(3)),
+          data_grade: state.grade,
+          action: state.action
+        }
+      };
+      el("jsonOutput").textContent = JSON.stringify(output, null, 2);
+    }
+
+    function updateClock() {
+      const formatter = new Intl.DateTimeFormat("zh-CN", {
+        timeZone: "Asia/Shanghai",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      el("clock").textContent = formatter.format(new Date()) + " Asia/Shanghai";
+    }
+
+    function update() {
+      updateValues();
+      const state = calculate();
+      render(state);
+      drawScores(state);
+      drawProbabilities(state);
+      updateClock();
+    }
+
+    ids.forEach(id => {
+      const node = el(id);
+      node.addEventListener("input", update);
+      node.addEventListener("change", update);
+    });
+    el("sampleBtn").addEventListener("click", () => applyState(sample));
+    el("resetBtn").addEventListener("click", () => applyState(reset));
+    setInterval(updateClock, 1000);
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+{
+  "market": "A股",
+  "profile": "public-demo",
+  "as_of": "2026-05-22 sample data, Asia/Shanghai",
+  "source_note": "This is a synthetic public portfolio for product demo and tests. It is not investment advice and does not represent a real account.",
+  "risk_preference": "中高风险，严格止损",
+  "total_assets_cny": 100000,
+  "total_market_value_cny": 38000,
+  "cash_available_cny": 62000,
+  "cash_withdrawable_cny": 62000,
+  "total_position_pct": 38,
+  "cash_pct": 62,
+  "short_term_total_limit_pct": 80,
+  "single_stock_limit_pct": 35,
+  "max_loss_per_trade_pct": 2,
+  "risk_engine": {
+    "version": "public-demo-2026",
+    "position_sizing_method": "先定义结构止损和1R亏损预算，再倒推出仓位；固定仓位上限只作为天花板，不作为买入理由。",
+    "risk_unit": "1R = 单笔计划最大亏损金额。每个买入、加仓、持有计划都必须说明亏多少是错、赚多少开始保护利润。",
+    "base_risk_budget_pct": 2,
+    "daily_stop_loss_pct": 1.5,
+    "weekly_stop_loss_pct": 4,
+    "monthly_drawdown_review_pct": 8,
+    "max_loss_streak_before_pause": 3,
+    "max_unplanned_trade_count_per_day": 0,
+    "minimum_reward_risk_ratio": {
+      "leader_or_core": 1.5,
+      "high_recognition_catch_up": 2,
+      "rebound_or_follower": 3
+    },
+    "market_regime_position_caps": [
+      {
+        "regime": "强进攻日",
+        "total_position_cap_pct": 90,
+        "new_position_rule": "只允许加到龙头、核心中军或已验证强趋势持仓；弱跟风不因情绪强而放大。",
+        "allowed_styles": ["追强核心", "趋势持有", "核心回踩低吸"]
+      },
+      {
+        "regime": "轮动日",
+        "total_position_cap_pct": 60,
+        "new_position_rule": "只做低吸或强换弱，不追高；已有高位票优先管理回撤。",
+        "allowed_styles": ["低吸", "换仓", "反弹减仓"]
+      },
+      {
+        "regime": "退潮日",
+        "total_position_cap_pct": 35,
+        "new_position_rule": "原则上不开新仓，只处理持仓和等待止跌确认。",
+        "allowed_styles": ["减仓", "清仓", "防守等待"]
+      },
+      {
+        "regime": "冰点修复日",
+        "total_position_cap_pct": 45,
+        "new_position_rule": "只做核心反包、低位首启或最高辨识度标的；失败必须快撤。",
+        "allowed_styles": ["核心反包", "低位启动", "小仓试错"]
+      },
+      {
+        "regime": "混沌日",
+        "total_position_cap_pct": 40,
+        "new_position_rule": "降低仓位，等待当前资金追捧方向和情绪方向确认；禁止为了交易而交易。",
+        "allowed_styles": ["观察", "减仓", "防守等待"]
+      }
+    ],
+    "correlation_limits": [
+      {
+        "risk_bucket": "同一高波动题材",
+        "max_total_exposure_pct": 50,
+        "rule": "最大持仓已超过35%时，新增同题材仓位必须是替换而不是叠加。"
+      },
+      {
+        "risk_bucket": "弱跟风和补涨",
+        "max_total_exposure_pct": 15,
+        "rule": "只允许小仓快进快出，不允许把补涨当核心仓。"
+      }
+    ],
+    "playbooks": [
+      {
+        "name": "阶段性资金核心强趋势",
+        "entry": "市场状态为强进攻或冰点修复转强，板块龙头和中军共振，个股放量突破或缩量回踩关键均线后转强。",
+        "add": "盈利后回踩不破关键位且板块仍强，才允许用利润滚动加仓。",
+        "exit": "跌破结构止损、龙头退潮、放量滞涨或竞价明显不及预期时减仓。"
+      },
+      {
+        "name": "轮动低吸核心",
+        "entry": "市场不是退潮，核心票缩量回踩支撑，板块仍有资金回流迹象。",
+        "add": "低吸后必须快速脱离成本区；无量弱反弹不加仓。",
+        "exit": "跌破低吸支撑或板块回流失败。"
+      },
+      {
+        "name": "新仓失败处理",
+        "entry": "不新增风险，只处理已有持仓。",
+        "add": "只有原持仓重新满足强趋势条件才允许加。",
+        "exit": "达到日内亏损线、结构破位、原逻辑被证伪或连续不及预期。"
+      }
+    ],
+    "trade_journal_fields": [
+      "date",
+      "stock",
+      "market_regime",
+      "playbook",
+      "planned_action",
+      "entry_trigger",
+      "stop_condition",
+      "planned_risk_r",
+      "target_reward_r",
+      "actual_execution",
+      "result_r",
+      "mistake_type",
+      "next_sizing_adjustment"
+    ]
+  },
+  "risk_notes": [
+    "Public sample only. Replace this file with a private config/portfolio.json for real local use.",
+    "The demo account starts at 38% position and should not exceed regime caps.",
+    "Any output must separate fact, inference, plan, and risk boundary."
+  ],
+  "positions": [
+    {
+      "code": "002156.SZ",
+      "name": "通富微电",
+      "quantity": 100,
+      "available_quantity": 100,
+      "cost": 50,
+      "last_price_from_screenshot": 50,
+      "market_value_cny": 5000,
+      "current_position_pct": 5,
+      "unrealized_pnl_cny": 0,
+      "unrealized_pnl_pct": 0,
+      "holding_period": "短线",
+      "theme_tags": ["半导体", "先进封装", "示例持仓"],
+      "risk_plan": {
+        "role_for_sizing": "半导体核心中军示例",
+        "reference_price": 50,
+        "stop_price_for_sizing": 49,
+        "initial_reduce_condition": "若跌破49且不能收回VWAP，按新仓失败处理。",
+        "structural_stop_condition": "跌破49且板块龙头同步走弱。",
+        "profit_protection_condition": "站稳52且成交确认后，上移止损到成本附近。"
+      },
+      "original_thesis": "示例：先进封装方向核心中军，需用实时盘口和板块强弱验证。",
+      "must_answer": "是否站稳50并强于半导体板块中位数。"
+    },
+    {
+      "code": "600584.SH",
+      "name": "长电科技",
+      "quantity": 400,
+      "available_quantity": 400,
+      "cost": 45,
+      "last_price_from_screenshot": 44,
+      "market_value_cny": 17600,
+      "current_position_pct": 17.6,
+      "unrealized_pnl_cny": -400,
+      "unrealized_pnl_pct": -2.22,
+      "holding_period": "短线",
+      "theme_tags": ["封测", "半导体中军", "示例持仓"],
+      "risk_plan": {
+        "role_for_sizing": "封测方向中军示例",
+        "reference_price": 44,
+        "stop_price_for_sizing": 42.8,
+        "initial_reduce_condition": "低于43且板块无承接时降低风险。",
+        "structural_stop_condition": "跌破42.8且10日线失守。",
+        "profit_protection_condition": "重新站回45并强于板块龙头后恢复趋势观察。"
+      },
+      "original_thesis": "示例：用于演示持仓贝叶斯更新，不代表真实账户。",
+      "must_answer": "是否从弱修复转为有效承接。"
+    },
+    {
+      "code": "600601.SH",
+      "name": "方正科技",
+      "quantity": 2000,
+      "available_quantity": 2000,
+      "cost": 7.7,
+      "last_price_from_screenshot": 7.7,
+      "market_value_cny": 15400,
+      "current_position_pct": 15.4,
+      "unrealized_pnl_cny": 0,
+      "unrealized_pnl_pct": 0,
+      "holding_period": "短线",
+      "theme_tags": ["PCB", "AI硬件链", "示例持仓"],
+      "risk_plan": {
+        "role_for_sizing": "PCB预期差示例",
+        "reference_price": 7.7,
+        "stop_price_for_sizing": 7.35,
+        "initial_reduce_condition": "跌破7.35且不能收回时减仓。",
+        "structural_stop_condition": "跌破7.35或PCB中军同步退潮。",
+        "profit_protection_condition": "放量站稳8.1后上移止损。"
+      },
+      "original_thesis": "示例：AI硬件链低位预期差，必须验证订单和毛利率。",
+      "must_answer": "是否强于PCB板块后排且有成交确认。"
+    }
+  ],
+  "watchlist_last_pruned": "2026-05-22",
+  "watchlist": [
+    {
+      "code": "600206.SH",
+      "name": "有研新材",
+      "status": "示例观察/电子材料",
+      "priority": "P2",
+      "theme_bucket": "电子材料/半导体材料",
+      "role": "预期差候选",
+      "evidence_strength": "需核验毛利率、现金流和订单兑现。",
+      "action_bias": "只做回踩承接或公告强化后的确认，不追连续加速。",
+      "reason": "演示观察池如何保持证据清单。",
+      "must_check": [
+        "半导体材料收入占比",
+        "毛利率是否改善",
+        "是否强于电子材料板块"
+      ]
+    },
+    {
+      "code": "002886.SZ",
+      "name": "沃特股份",
+      "status": "示例观察/高频高速材料",
+      "priority": "P2",
+      "theme_bucket": "AI上游材料/PCB材料",
+      "role": "材料预期差观察",
+      "evidence_strength": "需核验认证阶段、收入占比和量产进度。",
+      "action_bias": "只在公告/业绩/客户认证和竞价承接同时成立时考虑。",
+      "reason": "演示主题扩散中的证据门槛。",
+      "must_check": [
+        "客户认证是否进入量产",
+        "材料收入占比",
+        "是否强于板块中军"
+      ]
+    }
+  ],
+  "preferred_themes": [],
+  "stock_selection_preferences": {
+    "eligible_markets": ["沪市主板", "深市主板"],
+    "excluded_markets": ["创业板", "科创板", "北交所"],
+    "bonus_factors": [],
+    "required_market_data": [
+      "最新价",
+      "近1日涨跌幅",
+      "近5日涨跌幅",
+      "近10日涨跌幅",
+      "近20日涨跌幅",
+      "成交额",
+      "换手率",
+      "量比",
+      "是否涨停/跌停/炸板",
+      "5/10/20/60日线位置",
+      "支撑位",
+      "压力位",
+      "最近公告、互动易、调研纪要和产业新闻变化",
+      "市值、PE/PS/PB等估值和预期拥挤度"
+    ],
+    "screening_rules": [
+      "只筛选沪深主板股票；创业板、科创板、北交所股票一律排除",
+      "先按主题建立股票池，再用近期股价波动和成交活跃度筛选",
+      "每个方向至少输出龙头、中军、补涨、观察票和明确排除票",
+      "任何近期异动股必须先解释异动原因，不能只看概念标签",
+      "新买入必须给止损、1R、目标R和不交易条件"
+    ]
+  },
+  "forbidden": ["ST", "退市风险", "日成交额低于2亿", "无明确止损位的追涨"]
+}

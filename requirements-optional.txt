@@ -1,0 +1,3 @@
+# Optional collectors use AKShare for market activity, fund-flow proxies, news, and Dragon-Tiger data.
+# Core validation, run-packet rendering, tests, and the static demo do not require it.
+akshare>=1.17.0

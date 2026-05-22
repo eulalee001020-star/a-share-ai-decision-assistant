@@ -1,0 +1,25 @@
+{
+  "date": "2026-05-22",
+  "automation": "auction",
+  "data_grade": "B",
+  "available_data": ["A0 account/risk", "A1 quote/minute/MA", "B1 partial market breadth"],
+  "missing_data": ["A2 auction amount", "post-09:20 cancellation", "seal amount", "leader/core/follower auction ranking"],
+  "market_scores": {
+    "index_and_turnover": 1,
+    "market_breadth": 0,
+    "sentiment_relay": -1,
+    "mainline_structure": 1,
+    "losing_money_effect": 0
+  },
+  "candidate": {
+    "code": "002156.SZ",
+    "name": "通富微电",
+    "mode": "中军趋势确认",
+    "success_probability": 0.42,
+    "failure_probability": 0.34,
+    "noise_probability": 0.24,
+    "target_r": 1.8,
+    "noise_cost_r": 0.2,
+    "stop_distance_pct": 2.0
+  }
+}
