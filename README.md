@@ -7,7 +7,7 @@
 ## 项目入口
 
 - 产品案例：[Product Case Study](docs/portfolio.md)
-- 互动 Demo：[期望 R 与仓位权限 Demo](docs/demo/index.html)
+- 互动 Demo：[数据接口与覆盖率 Demo](docs/demo/index.html)
 - 工作流说明：[Runbook](docs/runbook.md)
 - 数据与证据边界：[Data Source Requirements](docs/data_sources.md)
 - 预测与评估体系：[Prediction Automation System](docs/prediction_automation_system.md)
@@ -29,7 +29,7 @@ A 股交易者每天面对三个高频痛点：
 | --- | --- | --- |
 | 交易场景识别 | `docs/prediction_automation_system.md` | 强进攻、轮动、退潮、冰点修复、混沌五类状态 |
 | 风控发动机 | `config/portfolio.example.json`、`tools/trading_assistant.py` | 从止损距离倒推仓位，避免用主观信心定仓 |
-| 数据权限门 | `docs/data_sources.md` | A0/A1/A2/B1/B2/B3/C 分层，缺 A2 时禁止追强 |
+| 数据权限门 | `docs/data_sources.md` | A0/A1/A2/B1/B2/B3/C 分层，数据不足时自动降级 |
 | Agent Prompt | `prompts/*.md` | 09:28、14:30、主题筛选、单股深研四类任务 |
 | 本地运行包 | `tools/trading_assistant.py render ...` | 自动组装上下文、配置校验、缺失数据和执行提示词 |
 | 预测复盘 | `prediction template/summary` | 事件概率、期望 R、结果日志与校准闭环 |
@@ -72,7 +72,7 @@ flowchart LR
 ## 设计原则
 
 1. 事实、推断、计划分离：价格、公告、资金代理和交易动作不混写。
-2. 数据不足自动降级：缺 A2 竞价数据时不能输出“竞价超预期”和追强计划。
+2. 数据不足自动降级：关键数据缺失时只输出低权限清单，不做高置信结论。
 3. 反沉没成本：持仓不因已经亏损、已经研究或已有仓位而获得继续持有特权。
 4. 概率化表达：每个可执行计划必须包含成功/失败/噪音概率和期望 R。
 5. 人在回路：系统不下单，只输出研究包、风控边界和复盘记录。

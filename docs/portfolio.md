@@ -49,11 +49,11 @@ flowchart TD
 
 ### 09:28 竞价预测与开盘计划
 
-目标：回答“今天能不能打、什么结构有下注资格、09:30-09:35 错了怎么撤”。
+目标：回答“今天能不能打、什么结构有下注资格、开盘后如何确认和撤销”。
 
 关键约束：
 
-1. 缺 A2 竞价数据时，禁止追强和“竞价超预期”结论。
+1. 关键竞价数据不足时，输出降级为开盘确认清单。
 2. 必须给市场状态、仓位权限、持仓事件概率、开盘执行表。
 3. 买入/加仓必须满足数据权限、正期望 R 和结构止损。
 
@@ -92,10 +92,10 @@ flowchart TD
 ## 7. Demo 使用方式
 
 1. 打开 [互动 Demo](demo/index.html)。
-2. 调整市场状态评分、数据可得性、成功/失败概率、目标 R 和止损距离。
-3. Demo 会实时输出市场权限、最大仓位、期望 R 和动作建议。
+2. 选择 `tail-data`、`stock-data` 或 `data-health` 接口模式。
+3. 输入日期、时间、股票代码和数据层，查看本地 runner 命令、预期输出文件和覆盖率结构。
 
-这个 Demo 不是交易建议，而是展示产品机制：AI 输出不应该只给“买/卖”，而应当受到数据等级、风险预算和预期收益共同约束。
+这个 Demo 不展示交易动作，只展示数据接入契约：系统先把行情、分时、均线、竞价手工导入和市场广度组织成可审计的数据包，再交给后续研究工作流使用。
 
 ## 8. 输入与输出示意
 
@@ -103,32 +103,30 @@ flowchart TD
 
 ```json
 {
-  "automation": "auction",
-  "data_grade": "B",
-  "market_scores": {
-    "index_and_turnover": 1,
-    "breadth": 0,
-    "sentiment": -1,
-    "mainline": 1,
-    "loss_effect": 0
-  },
-  "stock": "002156.SZ",
-  "success_probability": 0.42,
-  "failure_probability": 0.34,
-  "target_r": 1.8,
-  "noise_probability": 0.24
+  "mode": "tail-data",
+  "date": "2026-05-22",
+  "time": "1430",
+  "codes": ["002156.SZ", "600584.SH", "600601.SH"],
+  "enabled_layers": ["A1", "A2", "B1"]
 }
 ```
 
 输出示意：
 
-```text
-数据等级：B
-输出权限：缺A2竞价，只能给09:30-09:35确认条件，禁止追强。
-市场状态：混沌偏轮动
-期望R：0.37
-动作：观察/低吸确认，不允许竞价追高
-不交易条件：板块龙头弱于中军、开盘跌回VWAP、止损距离超过账户风险预算
+```json
+{
+  "command": "python3 tools/trading_assistant.py collect tail-data --date 2026-05-22 --time 1430 --codes 002156.SZ 600584.SH 600601.SH",
+  "expected_outputs": [
+    "reports/2026-05-22-1430-tail-data.csv",
+    "reports/2026-05-22-1430-tail-data.json"
+  ],
+  "coverage_probe": {
+    "quote": 0.92,
+    "minute": 0.88,
+    "daily": 0.94,
+    "core": 0.88
+  }
+}
 ```
 
 ## 9. 成功指标
