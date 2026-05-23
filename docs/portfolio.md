@@ -92,8 +92,8 @@ flowchart LR
 ## 7. Demo 使用方式
 
 1. 打开 [互动 Demo](demo/index.html)。
-2. 选择 `tail-data`、`stock-data` 或 `data-health` 接口模式。
-3. 输入日期、时间、股票代码和数据层，查看本地 runner 命令、预期输出文件、覆盖率结构和工作流链路。
+2. 选择“批量尾盘数据接口”“单股深研数据接口”或“数据健康门接口”。
+3. 输入日期、时间、股票代码和数据层，查看数据可信度核验、输出权限和工作流链路。
 
 这个 Demo 不展示交易动作，只展示数据接入契约和背后的审计链路：系统先把行情、分时、均线、竞价手工导入和市场广度组织成数据包，再经过数据健康门、运行包、约束规则、预测日志和结果日志进入可复盘工作流。
 
@@ -103,11 +103,11 @@ flowchart LR
 
 ```json
 {
-  "mode": "tail-data",
-  "date": "2026-05-22",
-  "time": "1430",
-  "codes": ["002156.SZ", "600584.SH", "600601.SH"],
-  "enabled_layers": ["A1", "A2", "B1"]
+  "接口模式": "批量尾盘数据接口",
+  "日期": "2026-05-22",
+  "时间": "14:30",
+  "标的范围": ["002156.SZ", "600584.SH", "600601.SH"],
+  "启用数据层": ["A1 行情层", "A2 竞价层", "B1 市场层"]
 }
 ```
 
@@ -115,27 +115,21 @@ flowchart LR
 
 ```json
 {
-  "command": "python3 tools/trading_assistant.py collect tail-data --date 2026-05-22 --time 1430 --codes 002156.SZ 600584.SH 600601.SH",
-  "expected_outputs": [
-    "reports/2026-05-22-1430-tail-data.csv",
-    "reports/2026-05-22-1430-tail-data.json"
-  ],
-  "coverage_probe": {
-    "quote": 0.92,
-    "minute": 0.88,
-    "daily": 0.94,
-    "core": 0.88
+  "数据可信度核验": {
+    "行情覆盖率": "92%",
+    "分时覆盖率": "88%",
+    "均线覆盖率": "94%",
+    "核心覆盖率": "88%",
+    "核验规则": "核心覆盖率取行情、分时、均线三项最低值；低于 80% 时降级输出"
   },
-  "workflow_trace": {
-    "data_health": {
-      "grade": "A",
-      "core_coverage": 0.88
-    },
-    "run_packet": "reports/{date}-{workflow}-run.md",
-    "audit_logs": [
-      "reports/predictions/{date}-predictions.jsonl",
-      "reports/outcomes/{date}-outcomes.jsonl"
-    ]
+  "输出权限": {
+    "健康等级": "A",
+    "状态": "可进入研究链路",
+    "允许输出": "完整研究链路"
+  },
+  "产物链路": {
+    "数据包": "批量数据包、缺口清单、健康门输入",
+    "后续链路": ["运行包", "约束规则", "预测日志", "复盘校准"]
   }
 }
 ```

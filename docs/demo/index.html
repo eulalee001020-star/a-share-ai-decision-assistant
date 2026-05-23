@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>A-Share Research Workflow Demo</title>
+  <title>A股研究工作流 Demo</title>
   <style>
     :root {
       color-scheme: light;
@@ -170,17 +170,51 @@
       background: #fff;
     }
 
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--blue);
-    }
-
     .value {
       font-size: 13px;
       font-variant-numeric: tabular-nums;
       color: var(--ink);
       min-width: 52px;
       text-align: right;
+    }
+
+    .check-panel {
+      display: grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .check-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .check-item strong {
+      font-size: 13px;
+    }
+
+    .check-item p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .bar-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #edf1f7;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
     }
 
     .grid-two {
@@ -393,12 +427,12 @@
 </head>
 <body>
   <header>
-    <h1>A-Share Research Workflow Console</h1>
+    <h1>A股研究工作流控制台</h1>
     <div class="header-meta">
       <span class="status-dot" aria-hidden="true"></span>
-      <span id="clock">Asia/Shanghai</span>
-      <span class="tag blue">Local runner</span>
-      <span class="tag amber">Read-only data</span>
+      <span id="clock">上海时间</span>
+      <span class="tag blue">本地运行</span>
+      <span class="tag amber">只读数据</span>
     </div>
   </header>
 
@@ -426,9 +460,9 @@
       <div class="field">
         <label for="mode">接口模式</label>
         <select id="mode">
-          <option value="tail-data">tail-data 批量尾盘数据</option>
-          <option value="stock-data">stock-data 单股数据包</option>
-          <option value="data-health">data-health 数据健康检查</option>
+          <option value="tail">批量尾盘数据接口（组合/观察池）</option>
+          <option value="stock">单股深研数据接口（证据栈）</option>
+          <option value="health">数据健康门接口（输出权限）</option>
         </select>
       </div>
 
@@ -461,16 +495,11 @@
       </div>
 
       <div class="field">
-        <div class="field-row"><label for="quoteCoverage">行情覆盖率</label><span class="value" id="quoteCoverageValue"></span></div>
-        <input id="quoteCoverage" type="range" min="0" max="100" value="92" step="1">
-      </div>
-      <div class="field">
-        <div class="field-row"><label for="minuteCoverage">分时覆盖率</label><span class="value" id="minuteCoverageValue"></span></div>
-        <input id="minuteCoverage" type="range" min="0" max="100" value="88" step="1">
-      </div>
-      <div class="field">
-        <div class="field-row"><label for="dailyCoverage">均线覆盖率</label><span class="value" id="dailyCoverageValue"></span></div>
-        <input id="dailyCoverage" type="range" min="0" max="100" value="94" step="1">
+        <div class="field-row">
+          <label>数据可信度核验</label>
+          <span class="value">采集结果</span>
+        </div>
+        <div class="check-panel" id="coverageSummary"></div>
       </div>
     </aside>
 
@@ -483,8 +512,8 @@
         <div class="kpis">
           <div class="kpi">
             <div class="label">请求模式</div>
-            <div class="metric" id="modeMetric">tail-data</div>
-            <div class="note" id="modeNote">批量生成 CSV/JSON</div>
+            <div class="metric" id="modeMetric">批量尾盘</div>
+            <div class="note" id="modeNote">组合和观察池批量数据</div>
           </div>
           <div class="kpi">
             <div class="label">目标数量</div>
@@ -526,8 +555,8 @@
 
       <section class="panel">
         <div class="panel-title">
-          <h2>覆盖率</h2>
-          <span class="small">用于决定后续报告的输出权限</span>
+          <h2>数据可信度核验</h2>
+          <span class="small">覆盖率来自采集产物，用于决定后续报告权限</span>
         </div>
         <div class="visuals">
           <canvas id="coverageCanvas" width="600" height="320" aria-label="覆盖率图"></canvas>
@@ -538,22 +567,22 @@
       <section class="panel">
         <div class="panel-title">
           <h2>工作流链路</h2>
-          <span id="statusTag" class="tag green">ready</span>
+          <span id="statusTag" class="tag green">可进入研究链路</span>
         </div>
         <div class="trace-grid" id="traceGrid"></div>
       </section>
 
       <section class="panel">
         <div class="panel-title">
-          <h2>获取数据接口与产物</h2>
-          <span class="small">展示背后的可审计文件，而不是只展示前端</span>
+          <h2>接口模式差异</h2>
+          <span class="small">三类接口按任务对象、证据颗粒度和输出权限区分</span>
         </div>
         <table>
           <thead>
             <tr>
-              <th>接口</th>
-              <th>用途</th>
-              <th>命令</th>
+              <th>接口模式</th>
+              <th>适用场景</th>
+              <th>产物/权限</th>
             </tr>
           </thead>
           <tbody id="interfaceRows"></tbody>
@@ -565,47 +594,72 @@
 
   <script>
     const ids = [
-      "runDate", "runTime", "mode", "codes", "quoteLayer", "marketLayer", "auctionLayer", "optionalLayer",
-      "quoteCoverage", "minuteCoverage", "dailyCoverage"
+      "runDate", "runTime", "mode", "codes", "quoteLayer", "marketLayer", "auctionLayer", "optionalLayer"
     ];
 
-    const coverageControls = [
-      ["quoteCoverage", "报价"],
-      ["minuteCoverage", "分时"],
-      ["dailyCoverage", "均线"]
+    const modes = {
+      tail: {
+        name: "批量尾盘数据接口",
+        shortName: "批量尾盘",
+        note: "面向持仓、观察池和临时追加代码，批量整理报价、分时、均线和市场结构。",
+        targetNote: "持仓 + 观察池 + 追加代码",
+        output: "批量数据包、缺口清单、健康门输入",
+        coverage: { quote: 92, minute: 88, daily: 94 }
+      },
+      stock: {
+        name: "单股深研数据接口",
+        shortName: "单股深研",
+        note: "面向一只股票的证据栈深挖，补齐报价、分钟线、日 K 和可选层证据。",
+        targetNote: "单个标的深度研究",
+        output: "单股数据包、证据栈输入、风险收益约束输入",
+        coverage: { quote: 100, minute: 96, daily: 98 }
+      },
+      health: {
+        name: "数据健康门接口",
+        shortName: "健康门",
+        note: "不生成交易观点，只核验覆盖率、字段缺口、数据层和后续报告输出权限。",
+        targetNote: "最近一次采集结果",
+        output: "健康等级、缺失字段、输出权限和降级原因",
+        coverage: { quote: 92, minute: 88, daily: 94 }
+      }
+    };
+
+    const coverageFields = [
+      ["quote", "行情覆盖率", "最新价、开高低、成交额、VWAP 等字段完整度"],
+      ["minute", "分时覆盖率", "分钟线连续性、异常缺口和时间戳完整度"],
+      ["daily", "均线覆盖率", "日 K 足够计算 5/10/20/60 日均线"]
+    ];
+
+    const interfaceRows = [
+      ["批量尾盘数据接口", "批量采集持仓、观察池和临时追加代码的报价、分时、均线和市场结构。", "批量数据包、缺口清单、健康门输入。"],
+      ["单股深研数据接口", "为单个标的建立更完整的个股证据栈，适合盘前复核、盘中跟踪和盘后深研。", "单股数据包、证据栈输入、风险收益约束输入。"],
+      ["数据健康门接口", "根据覆盖率、核心字段和数据层判断后续报告能输出到哪一层。", "健康等级、缺失字段、输出权限和降级原因。"]
     ];
 
     const sample = {
       runDate: "2026-05-22",
       runTime: "14:30",
-      mode: "tail-data",
+      mode: "tail",
       codes: "002156.SZ 600584.SH 600601.SH",
       quoteLayer: true,
       marketLayer: true,
       auctionLayer: true,
-      optionalLayer: false,
-      quoteCoverage: 92,
-      minuteCoverage: 88,
-      dailyCoverage: 94
+      optionalLayer: false
     };
 
     const reset = {
       runDate: "2026-05-22",
       runTime: "14:30",
-      mode: "data-health",
+      mode: "health",
       codes: "",
       quoteLayer: true,
       marketLayer: false,
       auctionLayer: false,
-      optionalLayer: false,
-      quoteCoverage: 0,
-      minuteCoverage: 0,
-      dailyCoverage: 0
+      optionalLayer: false
     };
 
     function el(id) { return document.getElementById(id); }
     function enabled(id) { return el(id).checked; }
-    function num(id) { return Number(el(id).value || 0); }
     function timeCompact() { return el("runTime").value.replace(":", ""); }
     function codes() { return el("codes").value.trim().split(/\s+/).filter(Boolean); }
 
@@ -621,40 +675,59 @@
 
     function layerNames() {
       const layers = [];
+      if (enabled("quoteLayer")) layers.push("A1 行情层");
+      if (enabled("auctionLayer")) layers.push("A2 竞价层");
+      if (enabled("marketLayer")) layers.push("B1 市场层");
+      if (enabled("optionalLayer")) layers.push("扩展层");
+      return layers;
+    }
+
+    function layerShortNames() {
+      const layers = [];
       if (enabled("quoteLayer")) layers.push("A1");
       if (enabled("auctionLayer")) layers.push("A2");
       if (enabled("marketLayer")) layers.push("B1");
-      if (enabled("optionalLayer")) layers.push("Optional");
+      if (enabled("optionalLayer")) layers.push("扩展");
       return layers;
+    }
+
+    function coverageColor(value) {
+      if (value >= 80) return "#15803d";
+      if (value >= 60) return "#b45309";
+      return "#b91c1c";
     }
 
     function calculate() {
       const mode = el("mode").value;
+      const modeInfo = modes[mode];
       const runDate = el("runDate").value;
       const targetTime = timeCompact();
       const selectedCodes = codes();
-      const coverages = coverageControls.map(([id]) => num(id));
+      const coverage = modeInfo.coverage;
+      const coverages = Object.values(coverage);
       const coreCoverage = Math.min(...coverages);
       const layers = layerNames();
-      const status = coreCoverage >= 80 && enabled("quoteLayer") ? "ready" : "needs-data";
-      const healthGrade = !enabled("quoteLayer") ? "D" : coreCoverage >= 80 && enabled("marketLayer") ? "A" : coreCoverage >= 60 ? "B" : "C";
-      const commandBase = `python3 tools/trading_assistant.py collect ${mode}`;
-      const dataHealthCommand = `python3 tools/trading_assistant.py data-health --date ${runDate} --time ${targetTime} --automation ${mode === "tail-data" ? "tail" : "auction"}`;
-      let command = "";
-      if (mode === "tail-data") {
-        command = `${commandBase} --date ${runDate} --time ${targetTime}${selectedCodes.length ? " --codes " + selectedCodes.join(" ") : ""}`;
-      } else if (mode === "stock-data") {
-        command = `python3 tools/trading_assistant.py collect stock-data --code ${selectedCodes[0] || "002156.SZ"} --date ${runDate} --time ${targetTime}`;
-      } else {
-        command = dataHealthCommand;
-      }
-      return { mode, runDate, targetTime, selectedCodes, coverages, coreCoverage, layers, status, healthGrade, command, dataHealthCommand };
+      const shortLayers = layerShortNames();
+      const hasQuoteLayer = enabled("quoteLayer");
+      const status = coreCoverage >= 80 && hasQuoteLayer ? "可进入研究链路" : "需补数据";
+      const healthGrade = !hasQuoteLayer ? "D" : coreCoverage >= 85 && enabled("marketLayer") ? "A" : coreCoverage >= 80 ? "B" : coreCoverage >= 60 ? "C" : "D";
+      return { mode, modeInfo, runDate, targetTime, selectedCodes, coverage, coreCoverage, layers, shortLayers, status, healthGrade };
     }
 
-    function updateValues() {
-      coverageControls.forEach(([id]) => {
-        el(id + "Value").textContent = `${num(id)}%`;
-      });
+    function renderCoverageSummary(state) {
+      el("coverageSummary").innerHTML = coverageFields.map(([key, label, desc]) => {
+        const value = state.coverage[key];
+        return `
+          <div class="check-item">
+            <div class="field-row">
+              <strong>${label}</strong>
+              <span class="value">${value}%</span>
+            </div>
+            <div class="bar-track"><span class="bar-fill" style="width: ${value}%; background: ${coverageColor(value)}"></span></div>
+            <p>${desc}</p>
+          </div>
+        `;
+      }).join("");
     }
 
     function drawCoverage(state) {
@@ -665,16 +738,16 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#172033";
       ctx.font = "24px system-ui, sans-serif";
-      ctx.fillText("核心数据覆盖", 28, 42);
-      coverageControls.forEach(([id, label], index) => {
+      ctx.fillText("数据可信度核验", 28, 42);
+      coverageFields.forEach(([key, label], index) => {
         const y = 86 + index * 62;
-        const value = num(id);
+        const value = state.coverage[key];
         ctx.fillStyle = "#5c667a";
         ctx.font = "18px system-ui, sans-serif";
         ctx.fillText(label, 28, y + 20);
         ctx.fillStyle = "#edf1f7";
         ctx.fillRect(120, y, 360, 28);
-        ctx.fillStyle = value >= 80 ? "#15803d" : value >= 60 ? "#b45309" : "#b91c1c";
+        ctx.fillStyle = coverageColor(value);
         ctx.fillRect(120, y, 360 * value / 100, 28);
         ctx.fillStyle = "#172033";
         ctx.fillText(`${value}%`, 500, y + 21);
@@ -684,7 +757,7 @@
       ctx.fillText(`${state.coreCoverage}%`, 28, 292);
       ctx.fillStyle = "#5c667a";
       ctx.font = "18px system-ui, sans-serif";
-      ctx.fillText("core coverage = min(quote, minute, daily)", 160, 292);
+      ctx.fillText("核心覆盖率 = 三项最低值；低于 80% 降级", 160, 292);
     }
 
     function drawLayers(state) {
@@ -700,7 +773,7 @@
         ["A1", "行情/分时/均线", enabled("quoteLayer")],
         ["A2", "竞价手工导入", enabled("auctionLayer")],
         ["B1", "市场广度/板块", enabled("marketLayer")],
-        ["Opt", "可选扩展层", enabled("optionalLayer")]
+        ["扩展", "可选扩展层", enabled("optionalLayer")]
       ];
       layers.forEach(([name, desc, active], index) => {
         const x = 44 + index * 132;
@@ -715,18 +788,20 @@
         ctx.font = "bold 28px system-ui, sans-serif";
         ctx.fillText(name, x + 22, 142);
         ctx.font = "13px system-ui, sans-serif";
-        ctx.fillText(active ? "enabled" : "idle", x + 22, 168);
+        ctx.fillText(active ? "已启用" : "未接入", x + 22, 168);
       });
       ctx.fillStyle = "#5c667a";
       ctx.font = "16px system-ui, sans-serif";
-      ctx.fillText(`Active layers: ${state.layers.join(", ") || "none"}`, 44, 260);
+      ctx.fillText(`启用数据层：${state.shortLayers.join("、") || "无"}`, 44, 260);
     }
 
     function render(state) {
-      const codeCount = state.mode === "stock-data" ? Math.min(state.selectedCodes.length || 1, 1) : state.selectedCodes.length;
-      el("modeMetric").textContent = state.mode;
-      el("modeNote").textContent = state.mode === "tail-data" ? "批量生成 CSV/JSON" : state.mode === "stock-data" ? "单股深度数据包" : "输出数据健康状态";
+      renderCoverageSummary(state);
+      const codeCount = state.mode === "stock" ? Math.min(state.selectedCodes.length || 1, 1) : state.mode === "health" ? 0 : state.selectedCodes.length;
+      el("modeMetric").textContent = state.modeInfo.shortName;
+      el("modeNote").textContent = state.modeInfo.note;
       el("codeMetric").textContent = String(codeCount || 0);
+      el("codeMetric").nextElementSibling.textContent = state.modeInfo.targetNote;
       el("coverageMetric").textContent = `${state.coreCoverage}%`;
       el("layerMetric").textContent = `${state.layers.length}/4`;
       el("layerNote").textContent = state.layers.length ? `${state.layers.join("、")} 已启用` : "未启用数据层";
@@ -734,15 +809,15 @@
       el("healthNote").textContent = state.healthGrade === "A" ? "可进入完整研究链路" : state.healthGrade === "B" ? "可生成低置信研究包" : "仅保留核验清单";
       el("valueMetric").textContent = state.healthGrade === "A" ? "3" : "2";
       el("statusTag").textContent = state.status;
-      el("statusTag").className = `tag ${state.status === "ready" ? "green" : "amber"}`;
+      el("statusTag").className = `tag ${state.status === "可进入研究链路" ? "green" : "amber"}`;
 
       const trace = [
-        ["01", "数据接口", `${state.mode} 读取代码、日期、时间和启用数据层，生成 CSV/JSON 数据包。`, true],
+        ["01", "数据接口", `${state.modeInfo.name}读取日期、时间、标的范围和启用数据层，形成结构化数据包。`, true],
         ["02", "数据健康门", `核心覆盖率 ${state.coreCoverage}%，健康等级 ${state.healthGrade}，决定后续报告能输出到什么深度。`, state.coreCoverage >= 60],
-        ["03", "运行包", "runner 把组合配置、风控规则、数据缺口、Prompt 和上下文合并为 run packet。", state.healthGrade !== "D"],
+        ["03", "运行包", "把组合配置、风控规则、数据缺口、提示词契约和上下文合并为运行包。", state.healthGrade !== "D"],
         ["04", "约束规则", "报告必须区分事实、推断、计划；缺失数据不能被模型补写。", true],
-        ["05", "预测日志", "可执行事件被写成 JSONL：概率、目标R、失败条件、expected_r、data_grade。", state.healthGrade === "A"],
-        ["06", "复盘校准", "结果日志记录 actual、result_r、error_type，用于后续权重修正。", state.healthGrade === "A"]
+        ["05", "预测日志", "可执行事件记录概率、目标 R、失败条件、期望 R 和数据等级。", state.healthGrade === "A"],
+        ["06", "复盘校准", "结果日志记录真实结果、收益风险比和错误类型，用于后续权重修正。", state.healthGrade === "A"]
       ];
       el("traceGrid").innerHTML = trace.map(item => `
         <div class="trace-card ${item[3] ? "active" : ""}">
@@ -752,45 +827,38 @@
         </div>
       `).join("");
 
-      const stockCommand = `python3 tools/trading_assistant.py collect stock-data --code ${state.selectedCodes[0] || "002156.SZ"} --date ${state.runDate} --time ${state.targetTime}`;
-      const tailCommand = `python3 tools/trading_assistant.py collect tail-data --date ${state.runDate} --time ${state.targetTime}${state.selectedCodes.length ? " --codes " + state.selectedCodes.join(" ") : ""}`;
-      el("interfaceRows").innerHTML = [
-        ["tail-data", "批量采集持仓/观察池/追加代码的报价、分时、均线和市场结构", tailCommand],
-        ["stock-data", "为单股深研生成报价、分钟、K线和可选层数据包", stockCommand],
-        ["data-health", "根据覆盖率和数据层判断后续报告输出权限", state.dataHealthCommand]
-      ].map(row => `<tr><td>${row[0]}</td><td>${row[1]}</td><td><code>${row[2]}</code></td></tr>`).join("");
+      el("interfaceRows").innerHTML = interfaceRows.map(row => `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`).join("");
 
       const output = {
-        request: {
-          mode: state.mode,
-          date: state.runDate,
-          time: state.targetTime,
-          codes: state.selectedCodes,
-          enabled_layers: state.layers
+        "请求摘要": {
+          "接口模式": state.modeInfo.name,
+          "日期": state.runDate,
+          "时间": el("runTime").value,
+          "标的范围": state.mode === "health" ? "最近一次采集结果" : state.mode === "stock" ? [state.selectedCodes[0] || "002156.SZ"] : state.selectedCodes,
+          "启用数据层": state.layers
         },
-        command: state.command,
-        workflow_trace: {
-          data_health: {
-            core_coverage: state.coreCoverage / 100,
-            grade: state.healthGrade,
-            enabled_layers: state.layers
-          },
-          run_packet: "reports/{date}-{workflow}-run.md",
-          prompt_contracts: ["prompts/auction_check.md", "prompts/tail_check.md", "prompts/single_stock_research.md"],
-          audit_logs: ["reports/predictions/{date}-predictions.jsonl", "reports/outcomes/{date}-outcomes.jsonl"]
+        "数据可信度核验": {
+          "行情覆盖率": `${state.coverage.quote}%`,
+          "分时覆盖率": `${state.coverage.minute}%`,
+          "均线覆盖率": `${state.coverage.daily}%`,
+          "核心覆盖率": `${state.coreCoverage}%`,
+          "核验规则": "核心覆盖率取行情、分时、均线三项最低值；低于 80% 时降级输出"
         },
-        expected_outputs: state.mode === "stock-data"
-          ? [`reports/${state.runDate}-${(state.selectedCodes[0] || "002156.SZ").replace(".", "")}-${state.targetTime}-stock-data.csv`, `reports/${state.runDate}-${(state.selectedCodes[0] || "002156.SZ").replace(".", "")}-${state.targetTime}-stock-data.json`]
-          : [`reports/${state.runDate}-${state.targetTime}-tail-data.csv`, `reports/${state.runDate}-${state.targetTime}-tail-data.json`],
-        coverage_probe: {
-          quote: num("quoteCoverage") / 100,
-          minute: num("minuteCoverage") / 100,
-          daily: num("dailyCoverage") / 100,
-          core: state.coreCoverage / 100
+        "输出权限": {
+          "健康等级": state.healthGrade,
+          "状态": state.status,
+          "允许输出": state.healthGrade === "A" ? "完整研究链路" : state.healthGrade === "B" ? "低置信研究包" : "仅保留数据缺口和核验清单"
         },
-        notes: [
-          "collector 只读取公开行情/手工导入数据，不连接券商交易接口",
-          "reports/ 默认不提交到公开仓库",
+        "产物链路": [
+          state.modeInfo.output,
+          "运行包",
+          "约束规则",
+          "预测日志",
+          "复盘校准"
+        ],
+        "边界说明": [
+          "只读取公开行情和手工导入数据，不连接券商交易接口",
+          "真实账户、持仓截图和手工竞价数据不进入公开仓库",
           "后续报告根据数据覆盖率和数据层决定输出范围"
         ]
       };
@@ -808,11 +876,10 @@
         second: "2-digit",
         hour12: false
       });
-      el("clock").textContent = formatter.format(new Date()) + " Asia/Shanghai";
+      el("clock").textContent = formatter.format(new Date()) + " 上海时间";
     }
 
     function update() {
-      updateValues();
       const state = calculate();
       render(state);
       drawCoverage(state);
