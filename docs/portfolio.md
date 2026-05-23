@@ -93,9 +93,9 @@ flowchart TD
 
 1. 打开 [互动 Demo](demo/index.html)。
 2. 选择 `tail-data`、`stock-data` 或 `data-health` 接口模式。
-3. 输入日期、时间、股票代码和数据层，查看本地 runner 命令、预期输出文件和覆盖率结构。
+3. 输入日期、时间、股票代码和数据层，查看本地 runner 命令、预期输出文件、覆盖率结构和工作流链路。
 
-这个 Demo 不展示交易动作，只展示数据接入契约：系统先把行情、分时、均线、竞价手工导入和市场广度组织成可审计的数据包，再交给后续研究工作流使用。
+这个 Demo 不展示交易动作，只展示数据接入契约和背后的审计链路：系统先把行情、分时、均线、竞价手工导入和市场广度组织成数据包，再经过数据健康门、运行包、约束规则、预测日志和结果日志进入可复盘工作流。
 
 ## 8. 输入与输出示意
 
@@ -125,6 +125,17 @@ flowchart TD
     "minute": 0.88,
     "daily": 0.94,
     "core": 0.88
+  },
+  "workflow_trace": {
+    "data_health": {
+      "grade": "A",
+      "core_coverage": 0.88
+    },
+    "run_packet": "reports/{date}-{workflow}-run.md",
+    "audit_logs": [
+      "reports/predictions/{date}-predictions.jsonl",
+      "reports/outcomes/{date}-outcomes.jsonl"
+    ]
   }
 }
 ```

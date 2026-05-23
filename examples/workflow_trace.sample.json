@@ -1,0 +1,37 @@
+{
+  "request": {
+    "mode": "tail-data",
+    "date": "2026-05-22",
+    "time": "1430",
+    "codes": ["002156.SZ", "600584.SH", "600601.SH"],
+    "enabled_layers": ["A1", "A2", "B1"]
+  },
+  "data_health": {
+    "grade": "A",
+    "core_coverage": 0.88,
+    "permission": "Generate a full research run packet with explicit data gaps and output constraints."
+  },
+  "artifacts": [
+    {
+      "path": "reports/2026-05-22-1430-tail-data.json",
+      "value": "Structured quote, minute, MA, breadth, and optional proxy data."
+    },
+    {
+      "path": "reports/2026-05-22-1430-tail-check-run.md",
+      "value": "Auditable context packet: config, risk engine, watchlist, data gaps, and prompt contract."
+    },
+    {
+      "path": "reports/predictions/2026-05-22-predictions.jsonl",
+      "value": "Machine-readable event probabilities and expected-R rows."
+    },
+    {
+      "path": "reports/outcomes/2026-05-22-outcomes.jsonl",
+      "value": "Post-market actual result, result-R, error type, and calibration note."
+    }
+  ],
+  "product_value": [
+    "Prevents the model from inventing market data by requiring a data health gate.",
+    "Turns narrative trading views into event-level records that can be reviewed.",
+    "Keeps private account state local while exposing reusable workflow logic publicly."
+  ]
+}

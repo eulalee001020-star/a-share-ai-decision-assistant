@@ -7,7 +7,7 @@
 ## 项目入口
 
 - 产品案例：[Product Case Study](docs/portfolio.md)
-- 互动 Demo：[数据接口与覆盖率 Demo](docs/demo/index.html)
+- 互动 Demo：[数据接口、覆盖率与工作流链路 Demo](docs/demo/index.html)
 - 工作流说明：[Runbook](docs/runbook.md)
 - 数据与证据边界：[Data Source Requirements](docs/data_sources.md)
 - 预测与评估体系：[Prediction Automation System](docs/prediction_automation_system.md)
@@ -33,6 +33,7 @@ A 股交易者每天面对三个高频痛点：
 | Agent Prompt | `prompts/*.md` | 09:28、14:30、主题筛选、单股深研四类任务 |
 | 本地运行包 | `tools/trading_assistant.py render ...` | 自动组装上下文、配置校验、缺失数据和执行提示词 |
 | 预测复盘 | `prediction template/summary` | 事件概率、期望 R、结果日志与校准闭环 |
+| 可审计产物 | `examples/workflow_trace.sample.json`、`examples/run_packet.sample.md` | 证明数据包、运行包、预测日志和复盘日志如何串起来 |
 
 ## 快速体验
 

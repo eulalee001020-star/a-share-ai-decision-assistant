@@ -54,4 +54,5 @@
 1. 用 `tail-data` 模式展示批量数据请求如何生成 CSV/JSON。
 2. 用 `stock-data` 模式展示单股深研数据包结构。
 3. 调低行情、分时或均线覆盖率，说明后续报告如何被数据覆盖率约束。
-4. 展示 `data-health` 和 `prediction template`，说明数据包如何进入可校准工作流。
+4. 展示页面里的工作流链路：数据接口、数据健康门、运行包、约束规则、预测日志、复盘校准。
+5. 打开 `examples/workflow_trace.sample.json` 和 `examples/run_packet.sample.md`，说明可审计产物如何证明背后逻辑。

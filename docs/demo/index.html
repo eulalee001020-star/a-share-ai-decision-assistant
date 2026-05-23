@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>A-Share Data Gateway Demo</title>
+  <title>A-Share Research Workflow Demo</title>
   <style>
     :root {
       color-scheme: light;
@@ -279,6 +279,45 @@
       gap: 14px;
     }
 
+    .trace-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .trace-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      min-height: 118px;
+    }
+
+    .trace-card .step {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .trace-card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .trace-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .trace-card.active {
+      border-color: #bfe8cb;
+      background: #fbfffc;
+    }
+
     canvas {
       width: 100%;
       height: 260px;
@@ -332,7 +371,7 @@
     }
 
     @media (max-width: 980px) {
-      main, .kpis, .visuals {
+      main, .kpis, .visuals, .trace-grid {
         grid-template-columns: 1fr;
       }
 
@@ -354,7 +393,7 @@
 </head>
 <body>
   <header>
-    <h1>A-Share Data Gateway Console</h1>
+    <h1>A-Share Research Workflow Console</h1>
     <div class="header-meta">
       <span class="status-dot" aria-hidden="true"></span>
       <span id="clock">Asia/Shanghai</span>
@@ -439,7 +478,7 @@
       <section class="panel">
         <div class="panel-title">
           <h2>接口概览</h2>
-          <span class="small">本页面展示数据接入契约，不连接券商交易接口</span>
+          <span class="small">从数据接口到可复盘研究链路</span>
         </div>
         <div class="kpis">
           <div class="kpi">
@@ -462,6 +501,26 @@
             <div class="metric" id="layerMetric">3/4</div>
             <div class="note" id="layerNote">A1、A2、B1 已启用</div>
           </div>
+          <div class="kpi">
+            <div class="label">健康门</div>
+            <div class="metric" id="healthMetric">A</div>
+            <div class="note" id="healthNote">可进入完整研究链路</div>
+          </div>
+          <div class="kpi">
+            <div class="label">审计产物</div>
+            <div class="metric">4</div>
+            <div class="note">数据包、运行包、预测、结果</div>
+          </div>
+          <div class="kpi">
+            <div class="label">价值点</div>
+            <div class="metric" id="valueMetric">3</div>
+            <div class="note">防幻觉、可复盘、可风控</div>
+          </div>
+          <div class="kpi">
+            <div class="label">接口边界</div>
+            <div class="metric">只读</div>
+            <div class="note">不连接券商交易接口</div>
+          </div>
         </div>
       </section>
 
@@ -478,8 +537,16 @@
 
       <section class="panel">
         <div class="panel-title">
-          <h2>获取数据接口</h2>
+          <h2>工作流链路</h2>
           <span id="statusTag" class="tag green">ready</span>
+        </div>
+        <div class="trace-grid" id="traceGrid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h2>获取数据接口与产物</h2>
+          <span class="small">展示背后的可审计文件，而不是只展示前端</span>
         </div>
         <table>
           <thead>
@@ -570,6 +637,7 @@
       const coreCoverage = Math.min(...coverages);
       const layers = layerNames();
       const status = coreCoverage >= 80 && enabled("quoteLayer") ? "ready" : "needs-data";
+      const healthGrade = !enabled("quoteLayer") ? "D" : coreCoverage >= 80 && enabled("marketLayer") ? "A" : coreCoverage >= 60 ? "B" : "C";
       const commandBase = `python3 tools/trading_assistant.py collect ${mode}`;
       const dataHealthCommand = `python3 tools/trading_assistant.py data-health --date ${runDate} --time ${targetTime} --automation ${mode === "tail-data" ? "tail" : "auction"}`;
       let command = "";
@@ -580,7 +648,7 @@
       } else {
         command = dataHealthCommand;
       }
-      return { mode, runDate, targetTime, selectedCodes, coverages, coreCoverage, layers, status, command, dataHealthCommand };
+      return { mode, runDate, targetTime, selectedCodes, coverages, coreCoverage, layers, status, healthGrade, command, dataHealthCommand };
     }
 
     function updateValues() {
@@ -662,8 +730,27 @@
       el("coverageMetric").textContent = `${state.coreCoverage}%`;
       el("layerMetric").textContent = `${state.layers.length}/4`;
       el("layerNote").textContent = state.layers.length ? `${state.layers.join("、")} 已启用` : "未启用数据层";
+      el("healthMetric").textContent = state.healthGrade;
+      el("healthNote").textContent = state.healthGrade === "A" ? "可进入完整研究链路" : state.healthGrade === "B" ? "可生成低置信研究包" : "仅保留核验清单";
+      el("valueMetric").textContent = state.healthGrade === "A" ? "3" : "2";
       el("statusTag").textContent = state.status;
       el("statusTag").className = `tag ${state.status === "ready" ? "green" : "amber"}`;
+
+      const trace = [
+        ["01", "数据接口", `${state.mode} 读取代码、日期、时间和启用数据层，生成 CSV/JSON 数据包。`, true],
+        ["02", "数据健康门", `核心覆盖率 ${state.coreCoverage}%，健康等级 ${state.healthGrade}，决定后续报告能输出到什么深度。`, state.coreCoverage >= 60],
+        ["03", "运行包", "runner 把组合配置、风控规则、数据缺口、Prompt 和上下文合并为 run packet。", state.healthGrade !== "D"],
+        ["04", "约束规则", "报告必须区分事实、推断、计划；缺失数据不能被模型补写。", true],
+        ["05", "预测日志", "可执行事件被写成 JSONL：概率、目标R、失败条件、expected_r、data_grade。", state.healthGrade === "A"],
+        ["06", "复盘校准", "结果日志记录 actual、result_r、error_type，用于后续权重修正。", state.healthGrade === "A"]
+      ];
+      el("traceGrid").innerHTML = trace.map(item => `
+        <div class="trace-card ${item[3] ? "active" : ""}">
+          <div class="step">${item[0]}</div>
+          <strong>${item[1]}</strong>
+          <p>${item[2]}</p>
+        </div>
+      `).join("");
 
       const stockCommand = `python3 tools/trading_assistant.py collect stock-data --code ${state.selectedCodes[0] || "002156.SZ"} --date ${state.runDate} --time ${state.targetTime}`;
       const tailCommand = `python3 tools/trading_assistant.py collect tail-data --date ${state.runDate} --time ${state.targetTime}${state.selectedCodes.length ? " --codes " + state.selectedCodes.join(" ") : ""}`;
@@ -682,6 +769,16 @@
           enabled_layers: state.layers
         },
         command: state.command,
+        workflow_trace: {
+          data_health: {
+            core_coverage: state.coreCoverage / 100,
+            grade: state.healthGrade,
+            enabled_layers: state.layers
+          },
+          run_packet: "reports/{date}-{workflow}-run.md",
+          prompt_contracts: ["prompts/auction_check.md", "prompts/tail_check.md", "prompts/single_stock_research.md"],
+          audit_logs: ["reports/predictions/{date}-predictions.jsonl", "reports/outcomes/{date}-outcomes.jsonl"]
+        },
         expected_outputs: state.mode === "stock-data"
           ? [`reports/${state.runDate}-${(state.selectedCodes[0] || "002156.SZ").replace(".", "")}-${state.targetTime}-stock-data.csv`, `reports/${state.runDate}-${(state.selectedCodes[0] || "002156.SZ").replace(".", "")}-${state.targetTime}-stock-data.json`]
           : [`reports/${state.runDate}-${state.targetTime}-tail-data.csv`, `reports/${state.runDate}-${state.targetTime}-tail-data.json`],
