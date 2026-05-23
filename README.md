@@ -7,6 +7,7 @@
 ## 项目入口
 
 - 产品案例：[Product Case Study](docs/portfolio.md)
+- Agent 架构：[Investment Decision-Support Agent Architecture](docs/agent_architecture.md)
 - 互动 Demo：[数据接口、覆盖率与工作流链路 Demo](docs/demo/index.html)
 - 工作流说明：[Runbook](docs/runbook.md)
 - 数据与证据边界：[Data Source Requirements](docs/data_sources.md)
@@ -33,6 +34,7 @@ A 股交易者每天面对三个高频痛点：
 | Agent Prompt | `prompts/*.md` | 09:28、14:30、主题筛选、单股深研四类任务 |
 | 本地运行包 | `tools/trading_assistant.py render ...` | 自动组装上下文、配置校验、缺失数据和执行提示词 |
 | 预测复盘 | `prediction template/summary` | 事件概率、期望 R、结果日志与校准闭环 |
+| Agent 架构 | `docs/agent_architecture.md` | 用最小必要模块串起数据、推理、风控和复盘 |
 | 可审计产物 | `examples/workflow_trace.sample.json`、`examples/run_packet.sample.md` | 证明数据包、运行包、预测日志和复盘日志如何串起来 |
 
 ## 快速体验
@@ -60,14 +62,14 @@ cp config/portfolio.example.json config/portfolio.json
 
 ```mermaid
 flowchart LR
-  A["A0 账户/持仓/风险预算"] --> D["数据权限门"]
-  B["A1 行情/分时/均线"] --> D
-  C["A2 竞价/盘口/板块结构"] --> D
-  D --> E["市场状态评分"]
-  E --> F["持仓与观察池证据栈"]
-  F --> G["概率 + 期望R"]
-  G --> H["操作计划/取消条件/不交易条件"]
-  H --> I["预测日志与复盘校准"]
+  A["User intent + private portfolio"] --> B["Data Gateway"]
+  B --> C["Data Health Gate"]
+  C --> D["Run Packet Builder"]
+  D --> E["Reasoning Workflows"]
+  E --> F["Risk Engine"]
+  F --> G["Decision Plan"]
+  G --> H["Prediction/Outcome Logs"]
+  H --> I["Calibration Review"]
 ```
 
 ## 设计原则
@@ -85,6 +87,7 @@ flowchart LR
 ├── config/portfolio.example.json      # 脱敏样例组合
 ├── docs/
 │   ├── portfolio.md                   # 产品案例说明
+│   ├── agent_architecture.md          # 投资辅助决策 Agent 架构
 │   ├── demo/index.html                # 可互动 Demo
 │   ├── data_sources.md                # 数据分层与证据要求
 │   ├── prediction_automation_system.md

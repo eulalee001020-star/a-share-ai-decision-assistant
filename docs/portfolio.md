@@ -32,18 +32,18 @@
 ## 4. 产品架构
 
 ```mermaid
-flowchart TD
-  U["用户目标：今天能不能打，买/卖/等什么"] --> C["私有组合配置 A0"]
-  C --> G["数据权限门"]
-  M["行情/分时/均线 A1"] --> G
-  A["竞价/盘口/队列 A2"] --> G
-  B["市场广度/板块结构 B1"] --> G
-  G --> R["市场状态分类"]
-  R --> S["持仓/观察池证据栈"]
-  S --> P["概率与期望R计算"]
-  P --> O["操作计划：触发、止损、目标、取消、不交易"]
-  O --> L["预测日志与复盘校准"]
+flowchart LR
+  A["User intent + private portfolio"] --> B["Data Gateway"]
+  B --> C["Data Health Gate"]
+  C --> D["Run Packet Builder"]
+  D --> E["Reasoning Workflows"]
+  E --> F["Risk Engine"]
+  F --> G["Decision Plan"]
+  G --> H["Prediction/Outcome Logs"]
+  H --> I["Calibration Review"]
 ```
+
+完整架构见 [Investment Decision-Support Agent Architecture](agent_architecture.md)。核心原则是保留最小必要链路：数据接入、数据健康门、运行包、推理工作流、风控引擎、决策计划和复盘校准；可选数据层只作为增强，不成为系统运行的前置条件。
 
 ## 5. 核心工作流
 
