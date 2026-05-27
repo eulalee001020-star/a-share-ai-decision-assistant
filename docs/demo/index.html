@@ -656,6 +656,54 @@
         </div>
       </section>
 
+      <section class="panel" id="validationSection">
+        <div class="panel-title">
+          <h2>验证与价值证据</h2>
+          <span class="small">验证产品约束和风控纪律，不声明投资收益</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="label">公开验证集</div>
+            <div class="metric">30条</div>
+            <div class="note">覆盖数据缺失、RAG、风控、误用和计划完整性</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">Guardrail 通过</div>
+            <div class="metric">30/30</div>
+            <div class="note">可通过本地命令重复检查</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">RAG 边界</div>
+            <div class="metric">6类</div>
+            <div class="note">无来源、过期、传闻、冲突、兑现、资金代理</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">风控检查</div>
+            <div class="metric">6类</div>
+            <div class="note">止损、1R、期望R、base rate、退潮、沉没成本</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">下一步证据</div>
+            <div class="metric">Replay</div>
+            <div class="note">用历史运行包验证校准误差和行为改进</div>
+          </div>
+        </div>
+        <div class="three-grid">
+          <div class="logic-card">
+            <strong>证明了什么</strong>
+            <p>证明数据权限、消息面边界、风控完整性和误用拦截可以被自动检查。</p>
+          </div>
+          <div class="logic-card">
+            <strong>没有证明什么</strong>
+            <p>不证明长期收益，也不证明生产级实时数据和完整向量库已经上线。</p>
+          </div>
+          <div class="logic-card">
+            <strong>怎么继续验证</strong>
+            <p>用真实 09:28/14:30 历史运行包做 replay，记录概率分桶、Brier score 和计划外交易率。</p>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" id="beginnerSection">
         <div class="panel-title">
           <h2>为什么会得出这个结论</h2>

@@ -2,7 +2,7 @@
 
 本项目的评估目标不是证明 AI 能预测市场，而是证明 AI 在高噪声、高风险场景里能稳定遵守数据边界、输出权限和风控纪律。
 
-评测样本、消息面 RAG/Embedding 评测和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。
+评测样本、消息面 RAG/Embedding 评测和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。公开 guardrail 验证结果见 [Public Validation Report](validation_report.md)。
 
 ## 1. 输出质量指标
 
@@ -33,6 +33,14 @@
   "error_type": "positive-factor-overweight"
 }
 ```
+
+公开仓库提供一组可运行的离线 guardrail 验证：
+
+```bash
+python3 tools/portfolio_validation.py --format markdown
+```
+
+这组验证检查数据权限、RAG 证据边界、风控完整性、用户误用拦截和计划可审计性，不用于证明投资收益。
 
 建议按周复盘：
 

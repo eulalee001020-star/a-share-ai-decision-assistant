@@ -38,6 +38,7 @@ flowchart LR
 | Decision Plan | Produce human-readable action plan | Evidence + risk engine | Buy/hold/reduce/observe plan, or no-trade condition |
 | Audit Logs | Preserve machine-readable predictions and results | Event probabilities and actual outcomes | JSONL prediction/outcome rows |
 | Calibration Review | Find systematic mistakes | Logs and error types | Weight adjustments and next-run guardrails |
+| Guardrail Validation | Regression-test data, RAG, risk, misuse, and plan-quality controls | Public validation cases | 30-case offline validation report |
 
 ## 3. Data Layers And Permissions
 
@@ -101,7 +102,21 @@ The system follows a decision-quality philosophy rather than a prediction-certai
 
 This does not guarantee stable profit. It creates a process where risk, evidence, and calibration can be reviewed, corrected, and improved over time.
 
-## 7. What Makes The Agent Useful
+## 7. Validation Boundary
+
+The public repository includes `tools/portfolio_validation.py`, a 30-case
+offline guardrail validation set. It checks whether the product rules handle
+data gaps, RAG source conflicts, missing stops, deterministic-return requests,
+auto-trade requests, and plan-quality gaps.
+
+This validation is intentionally scoped:
+
+1. It validates guardrails and output permissions.
+2. It does not validate live investment returns.
+3. It does not claim production-grade realtime RAG latency.
+4. It creates a reproducible baseline before historical replay validation.
+
+## 8. What Makes The Agent Useful
 
 | Value | How It Shows Up |
 | --- | --- |

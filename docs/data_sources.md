@@ -5,8 +5,8 @@ Fresh A-share screening depends on accessible data. Use the best available sourc
 ## Stock Pool Discovery
 
 1. Exchange announcements and company公告 for verified catalysts.
-2. Public concept/sector constituent pages when available, such as 东方财富、同花顺、财联社、证券时报、券商研报摘要.
-3. Industry-chain research from public reports or company investor-relations disclosures.
+2. Public concept/sector constituent pages when available, such as 东方财富、同花顺、财联社、证券时报.
+3. Industry-chain research from exchange/company disclosures, Shanghai Securities News / cnstock-style public news, or company investor-relations disclosures.
 4. News search for new catalysts. Rumors must be marked as unverified.
 
 For each theme, do not stop at a single concept label. Split into sub-themes:
