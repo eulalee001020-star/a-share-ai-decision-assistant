@@ -1310,9 +1310,10 @@ def prediction_template_rows(root: Path, run_date: str, automation: str) -> list
                 events = ["09:35站回关键位", "10:00站稳VWAP", "收盘站上修复线", "触发结构止损"]
             else:
                 events = ["收盘站强", "次日竞价延续", "次日低开兑现", "触发隔夜失败条件"]
-            for event in events:
+            for event_index, event in enumerate(events, start=1):
                 rows.append(
                     {
+                        "plan_id": f"{run_date}-{automation}-{code}-{event_index:02d}",
                         "run_time": run_time,
                         "automation": automation,
                         "source_type": source_type,
@@ -1321,6 +1322,8 @@ def prediction_template_rows(root: Path, run_date: str, automation: str) -> list
                         "event": event,
                         "mode": "",
                         "base_rate": None,
+                        "base_rate_source": "",
+                        "base_rate_sample_size": 0,
                         "positive_adjustments": [],
                         "negative_adjustments": [],
                         "success_probability": None,

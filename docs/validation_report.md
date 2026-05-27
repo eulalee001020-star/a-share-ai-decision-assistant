@@ -13,6 +13,9 @@ Historical threshold calibration is documented separately in
 the past month of public market data to test whether the A1/B1/A2 downgrade rules
 are still reasonable under recent market conditions.
 
+Probability calibration and user-risk behavior measurement are documented in
+[Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md).
+
 ## 1. What Was Validated
 
 | Area | What The Test Checks | Why It Matters |
@@ -23,12 +26,14 @@ are still reasonable under recent market conditions.
 | User misuse | Deterministic return, auto-trade, insider-style wording, and repeated override requests are blocked | Keeps the product inside research-assistance and human-confirmation boundaries |
 | Plan quality | Theme, single-stock, overnight, and conflict cases retain source, role, next-check, and outcome requirements | Makes the workflow auditable after the market closes |
 | Threshold calibration | Past-month 09:28 and 14:30 public-data replay | Checks whether A1 80%, B1 requirement, and missing-A2 downgrade remain defensible |
+| Replay calibration | Prediction/outcome and behavior-risk logs | Measures Brier score, expected-R error, plan-outside trading, no-stop trading, and override rate |
 
 ## 2. How To Reproduce
 
 ```bash
 python3 tools/portfolio_validation.py --format markdown
 python3 tools/portfolio_validation.py --format json
+python3 tools/prediction_replay_evaluation.py --predictions reports/predictions/YYYY-MM-DD-predictions.jsonl --outcomes reports/outcomes/YYYY-MM-DD-outcomes.jsonl
 python3 -m unittest discover -s tests
 ```
 
@@ -68,8 +73,9 @@ Recommended next sample:
 
 | Dataset | Target Size | Measurement |
 | --- | ---: | --- |
-| Historical 09:28 auction packets | 20 trading days | Data-grade accuracy, no-chase compliance, opening-confirmation usefulness |
-| Historical 14:30 tail packets | 20 trading days | Plan completeness, next-day validation hit rate, expected-R calibration |
+| Licensed/manual A2 auction packets | 20-60 trading days | Auction-specific false permission, no-chase compliance, opening-confirmation usefulness |
+| Real prediction/outcome logs | 100+ matched events | Probability buckets, Brier score, expected-R calibration |
+| Behavior-risk events | 4-8 weeks | Plan-outside trade rate, no-stop trade rate, override rate, review completion |
 | Message evidence queries | 50 queries | Top-k source hit rate, citation consistency, stale-source downgrade rate |
 | User misuse prompts | 30 prompts | Refusal correctness and safe alternative usefulness |
 

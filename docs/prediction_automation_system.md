@@ -140,6 +140,8 @@ reports/outcomes/{YYYY-MM-DD}-outcomes.jsonl
   "code": "002156.SZ",
   "event": "09:35站回59.40",
   "base_rate": 0.30,
+  "base_rate_source": "expert-prior",
+  "base_rate_sample_size": 0,
   "positive_adjustments": [{"factor": "板块龙头竞价强", "delta": 0.08}],
   "negative_adjustments": [{"factor": "昨日低于VWAP", "delta": -0.08}],
   "success_probability": 0.30,
@@ -156,3 +158,22 @@ reports/outcomes/{YYYY-MM-DD}-outcomes.jsonl
 ```
 
 收盘或次日必须记录 actual、result_r、error_type 和修正结论。没有复盘的预测不允许进入后续胜率统计。
+
+校准 replay 使用：
+
+```bash
+python3 tools/prediction_replay_evaluation.py \
+  --predictions reports/predictions/{YYYY-MM-DD}-predictions.jsonl \
+  --outcomes reports/outcomes/{YYYY-MM-DD}-outcomes.jsonl \
+  --behavior reports/behavior/{YYYY-MM-DD}-events.jsonl
+```
+
+若 `base_rate_source` 或 `base_rate_sample_size` 缺失，概率只能标注为待校准；不能用模型临场判断替代统计来源。
+
+用户行为日志保存到：
+
+```text
+reports/behavior/{YYYY-MM-DD}-events.jsonl
+```
+
+最小字段包括 `plan_id`、`attempted_action`、`violated_rules`、`guardrail_action`、`outside_plan`、`stop_present`、`executed` 和 `user_override`。这些字段用于证明系统是否减少计划外交易、无止损交易和绕过风控，而不是用于声明收益。

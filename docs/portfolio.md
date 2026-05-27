@@ -128,7 +128,7 @@ flowchart LR
 | 业务层 | 复盘耗时、交易前计划完整率、风险暴露清晰度 |
 | 风险层 | 幻觉拦截率、越权输出率、无止损计划率、确定性承诺拦截率 |
 
-完整评测集和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。
+完整评测集和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。阈值、base rate 和用户风险行为的专项方案见 [Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md)。
 
 公开验证结果见 [Public Validation Report](validation_report.md)。当前仓库提供 30 条离线 guardrail 用例，覆盖数据缺失、RAG 证据边界、风控完整性、用户误用拦截和计划可审计性。验证命令：
 
@@ -139,6 +139,17 @@ python3 tools/portfolio_validation.py --format markdown
 该验证不证明投资收益，只证明产品规则和输出边界可以被重复检查。
 
 阈值校准见 [Historical Threshold Calibration](historical_threshold_calibration.md)。过去一个月公开数据覆盖 20 个交易日、100 个 09:28 开盘确认观察和 100 个 14:30 尾盘观察，支持保留 A1 80% 覆盖阈值、B1 市场结构要求和缺 A2 时禁止追强的降级规则。
+
+概率与风险行为 replay 工具：
+
+```bash
+python3 tools/prediction_replay_evaluation.py \
+  --predictions reports/predictions/YYYY-MM-DD-predictions.jsonl \
+  --outcomes reports/outcomes/YYYY-MM-DD-outcomes.jsonl \
+  --behavior reports/behavior/YYYY-MM-DD-events.jsonl
+```
+
+它用于计算概率分桶、Brier score、expected-R 偏差、base rate 缺失数量、计划外交易率和无止损交易率。当前公开仓库只展示评估机制和样例，不把这些指标包装成已验证的真实用户收益。
 
 已识别的关键迭代：
 
@@ -158,6 +169,7 @@ python3 tools/portfolio_validation.py --format markdown
 | 工作流提示词 | `prompts/auction_check.md`、`prompts/tail_check.md`、`prompts/theme_screening.md`、`prompts/single_stock_research.md` |
 | 数据与权限规则 | `docs/data_sources.md`、`docs/prediction_automation_system.md` |
 | 评测说明 | `docs/evaluation.md`、`docs/evaluation_cases.md` |
+| 校准与风险证明 | `docs/calibration_and_risk_proof_plan.md`、`tools/prediction_replay_evaluation.py` |
 | 可互动 Demo | `docs/demo/index.html` |
 | 自动化校验 | `tests/`、GitHub Actions |
 | 隐私隔离 | `.gitignore` 忽略真实组合、报告、截图和手工竞价数据 |
@@ -213,6 +225,6 @@ python3 tools/portfolio_validation.py --format markdown
 
 1. 接入更稳定的交易日历和实时行情源，降低手工数据依赖。
 2. 在已完成过去一个月公开数据阈值校准的基础上，继续补真实 prediction/outcome replay，覆盖概率分桶、Brier score、expected-R 偏差和 50 个消息面查询。
-3. 增加用户行为日志：是否按计划执行、是否出现计划外交易。
+3. 增加用户行为日志：是否按计划执行、是否出现计划外交易、是否无止损交易、是否绕过 guardrail。
 4. 分离短线、波段、配置型策略，避免不同时间尺度的规则互相污染。
 5. 形成一页版和面试讲解版作品集，用同一套证据支撑不同展示深度。

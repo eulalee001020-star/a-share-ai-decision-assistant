@@ -58,7 +58,7 @@ Daily reports should focus on decision-changing facts and data permission:
 
 Do not fill reports with chronic missing fields. Chips, full Level-2 queue, hidden liquidity, realtime holder changes, fund/HK-connect updates and unstable individual fund-flow endpoints are Tier 3 context. Mention them only if they are supplied by Tonghuashun/screenshots/export or their absence directly blocks a conclusion.
 
-For prediction outputs, each actionable plan must include base rate, positive adjustments, negative adjustments, success/failure/noise probability, expected R, and data grade. If data grade is below the plan's required permission, the plan must be downgraded automatically.
+For prediction outputs, each actionable plan must include base rate, base-rate source, base-rate sample size, positive adjustments, negative adjustments, success/failure/noise probability, expected R, and data grade. If data grade is below the plan's required permission, the plan must be downgraded automatically. If base-rate source or sample size is missing, the probability must be marked as uncalibrated.
 
 ## Collectors
 
@@ -95,12 +95,14 @@ Predictions and outcomes are auditable artifacts:
 
 1. `reports/predictions/{YYYY-MM-DD}-predictions.jsonl`
 2. `reports/outcomes/{YYYY-MM-DD}-outcomes.jsonl`
+3. `reports/behavior/{YYYY-MM-DD}-events.jsonl`
 
 Use:
 
 ```bash
 python3 tools/trading_assistant.py prediction template --date YYYY-MM-DD --automation auction
 python3 tools/trading_assistant.py prediction summary --date YYYY-MM-DD
+python3 tools/prediction_replay_evaluation.py --predictions reports/predictions/YYYY-MM-DD-predictions.jsonl --outcomes reports/outcomes/YYYY-MM-DD-outcomes.jsonl --behavior reports/behavior/YYYY-MM-DD-events.jsonl
 ```
 
 Templates are not predictions by themselves. They are the structured rows the automation must fill with probabilities and expected R.

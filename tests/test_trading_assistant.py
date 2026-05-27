@@ -88,6 +88,9 @@ class TradingAssistantTests(unittest.TestCase):
         self.assertTrue(any(row["code"] == sample_code for row in rows))
         self.assertTrue(any(row["source_type"] == "watchlist" for row in rows))
         self.assertTrue(all("success_probability" in row for row in rows))
+        self.assertTrue(all("plan_id" in row for row in rows))
+        self.assertTrue(all("base_rate_source" in row for row in rows))
+        self.assertTrue(all("base_rate_sample_size" in row for row in rows))
 
     def test_manual_auction_template_contains_a2_fields(self):
         payload = trading_assistant.manual_auction_template(ROOT, "2026-05-14")

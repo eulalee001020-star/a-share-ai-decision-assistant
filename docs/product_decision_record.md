@@ -47,10 +47,14 @@ Initial historical calibration:
 - Result: A1 reached >=80% coverage on 20/20 sampled days for both 09:28 confirmation proxy and 14:30.
 - A2 result: 0/20 public historical auction samples had true 09:15-09:25 auction amount, seal amount, post-09:20 cancellation, or queue data.
 
-See [Historical Threshold Calibration](historical_threshold_calibration.md).
+See [Historical Threshold Calibration](historical_threshold_calibration.md) and
+[Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md).
 
 The important product point is that thresholds are visible and adjustable by
-validation, not hidden inside a prompt.
+validation, not hidden inside a prompt. The rule for future threshold changes is
+also explicit: do not optimize for "more trade opportunities" first. Optimize
+for lower false-permission rate first, then evaluate whether the rule is too
+strict.
 
 The most important limitation remains A2: public historical data can support the
 "do not chase without A2" rule through opening-gap and first-15-minute volatility,
@@ -125,6 +129,17 @@ Current rule:
    broad interval instead of pseudo-precision.
 3. Predictions without outcome logs cannot be used to claim win rate.
 
+Implementation rule:
+
+1. `base_rate_source` must explain whether the prior comes from same-playbook
+   replay, adjacent-playbook replay, public-market context, or expert prior.
+2. `base_rate_sample_size` controls output precision. Fewer than 30 samples
+   means "待校准"; 30-99 samples means rough interval; 100+ samples can be
+   bucketed by regime and data grade.
+3. `tools/prediction_replay_evaluation.py` computes probability buckets,
+   Brier score, multiclass Brier, expected-R error, and missing base-rate
+   fields from prediction/outcome logs.
+
 The product value is not "we know the exact probability today". It is "we force
 probability claims into a log structure that can be audited later".
 
@@ -165,12 +180,26 @@ Better metrics:
 | Plan completeness rate | Measures whether every action has trigger, stop, target, invalidation, and no-trade condition |
 | Unsupported-action block rate | Measures whether the product prevents actions when data is missing |
 | Plan-outside-trade rate | Measures whether users still violate their own plan |
+| No-stop trade rate | Measures whether high-risk trades still happen without a stop |
+| User override rate | Measures whether users bypass guardrails after warnings |
 | Average review time | Measures productivity without claiming alpha |
 | Outcome-log completion rate | Measures whether the system creates learning data |
 | Probability calibration error | Measures overconfidence rather than raw return |
 
 Only after these are stable should a private historical replay compare risk and
 return outcomes. Public portfolio wording should avoid claiming long-term profit.
+
+Behavior-risk logs should be stored separately from prediction logs:
+
+```text
+reports/behavior/{YYYY-MM-DD}-events.jsonl
+```
+
+The minimum fields are `plan_id`, `attempted_action`, `violated_rules`,
+`guardrail_action`, `outside_plan`, `stop_present`, `executed`, and
+`user_override`. This allows the product to prove whether it reduced
+unplanned/no-stop/override behavior before making any claim about account-level
+outcomes.
 
 ## 10. Compliance Boundary
 

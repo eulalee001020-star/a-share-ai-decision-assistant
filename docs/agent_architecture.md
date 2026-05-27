@@ -10,7 +10,7 @@ This document defines the project as an investment decision-support agent, not a
 | Low complexity | Keep the core runnable locally with minimal dependencies | Python CLI + JSON config + Markdown prompts + static demo |
 | Evidence-based reasoning | No conclusion can outrun the available data | A0/A1/A2/B1/B2/B3/C data layers and output permission rules |
 | Operational discipline | Every plan must define trigger, stop, target, invalidation, and do-not-trade condition | Prompt contracts and risk engine checks |
-| Long-term positive expectancy process | Improve decision quality through review and calibration | Prediction JSONL, outcome JSONL, error types, weekly review |
+| Decision-quality improvement | Improve decision quality through review and calibration | Prediction JSONL, outcome JSONL, behavior-risk JSONL, error types, weekly review |
 
 ## 2. Minimal Architecture
 
@@ -22,7 +22,7 @@ flowchart LR
   D --> E["Reasoning Workflows"]
   E --> F["Risk Engine"]
   F --> G["Decision Plan"]
-  G --> H["Prediction and Outcome Logs"]
+  G --> H["Prediction, Outcome, and Behavior Logs"]
   H --> I["Calibration Review"]
 ```
 
@@ -36,8 +36,8 @@ flowchart LR
 | Reasoning Workflows | Structure market, sector, and stock judgment | Run packet + prompt contract | Facts, inferences, candidate plans |
 | Risk Engine | Convert stops and regime caps into position limits | Account, stop distance, regime, loss limits | Max size, risk in R, invalidation |
 | Decision Plan | Produce human-readable action plan | Evidence + risk engine | Buy/hold/reduce/observe plan, or no-trade condition |
-| Audit Logs | Preserve machine-readable predictions and results | Event probabilities and actual outcomes | JSONL prediction/outcome rows |
-| Calibration Review | Find systematic mistakes | Logs and error types | Weight adjustments and next-run guardrails |
+| Audit Logs | Preserve machine-readable predictions, results, and behavior-risk events | Event probabilities, actual outcomes, user overrides | JSONL prediction/outcome/behavior rows |
+| Calibration Review | Find systematic mistakes | Logs, behavior metrics, and error types | Weight adjustments and next-run guardrails |
 | Guardrail Validation | Regression-test data, RAG, risk, misuse, and plan-quality controls | Public validation cases | 30-case offline validation report |
 
 ## 3. Data Layers And Permissions
@@ -63,7 +63,8 @@ The rule is simple: missing data lowers output permission automatically. The mod
    market regime, macro, sector, stock evidence, resonance, stage, operation, risk.
 6. Write prediction rows for every event that needs calibration.
 7. Record outcome rows after the event window closes.
-8. Review mistakes by error type: scenario error, base-rate error, factor overweight, data missing, unclear execution.
+8. Record behavior-risk rows when a user attempts plan-outside, no-stop, or guardrail-violating actions.
+9. Review mistakes by error type: scenario error, base-rate error, factor overweight, data missing, unclear execution, or user override.
 
 ## 5. Cost And Complexity Control
 
@@ -123,5 +124,5 @@ This validation is intentionally scoped:
 | Fewer hallucinations | Data health gate blocks unsupported claims |
 | Better execution discipline | Plans require trigger, stop, target, invalidation, and no-trade condition |
 | Lower review cost | Run packets collect context in one file |
-| Measurable learning | Prediction and outcome logs convert narrative judgment into data |
+| Measurable learning | Prediction, outcome, and behavior logs convert narrative judgment and user-risk behavior into data |
 | Safer public sharing | Private config and reports are ignored by Git; sample config demonstrates the workflow |

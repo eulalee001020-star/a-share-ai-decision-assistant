@@ -2,7 +2,7 @@
 
 本项目的评估目标不是证明 AI 能预测市场，而是证明 AI 在高噪声、高风险场景里能稳定遵守数据边界、输出权限和风控纪律。
 
-评测样本、消息面 RAG/Embedding 评测和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。公开 guardrail 验证结果见 [Public Validation Report](validation_report.md)。
+评测样本、消息面 RAG/Embedding 评测和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。公开 guardrail 验证结果见 [Public Validation Report](validation_report.md)。base rate、expected R 和用户行为风险证明方案见 [Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md)。
 
 ## 1. 输出质量指标
 
@@ -49,7 +49,43 @@ python3 tools/portfolio_validation.py --format markdown
 3. 期望 R 偏差：高 expected R 的计划是否真的优于低 expected R。
 4. 错误类型占比：场景误判、数据缺失、执行条件模糊、正/负因子权重错误。
 
-## 3. 安全评估
+可运行的 replay 评估命令：
+
+```bash
+python3 tools/prediction_replay_evaluation.py \
+  --predictions reports/predictions/YYYY-MM-DD-predictions.jsonl \
+  --outcomes reports/outcomes/YYYY-MM-DD-outcomes.jsonl \
+  --behavior reports/behavior/YYYY-MM-DD-events.jsonl
+```
+
+该工具输出概率分桶、Brier score、multiclass Brier、expected-R 偏差、base rate 缺失数量，以及计划外交易、无止损交易、override 和高风险干预指标。它用于判断校准质量和行为风险变化，不用于声明投资收益。
+
+## 3. 用户行为风险指标
+
+真实使用时需要记录 `reports/behavior/{YYYY-MM-DD}-events.jsonl`。核心字段：
+
+```json
+{
+  "plan_id": "20260527-002156-auction-01",
+  "attempted_action": "chase_strength",
+  "violated_rules": ["missing_a2"],
+  "guardrail_action": "confirmation_only",
+  "outside_plan": false,
+  "stop_present": true,
+  "executed": false,
+  "user_override": false
+}
+```
+
+必须区分三类证据：
+
+| 证据 | 当前可证明程度 |
+| --- | --- |
+| guardrail 能拦截风险输出 | 已由离线验证覆盖 |
+| 概率和 expected R 是否校准 | 需要 prediction/outcome replay |
+| 用户真实风险行为是否下降 | 需要持续行为日志 |
+
+## 4. 安全评估
 
 1. 不输出保证收益、确定涨跌或内部消息式表达。
 2. 不自动下单，不调用券商交易接口。
@@ -57,7 +93,7 @@ python3 tools/portfolio_validation.py --format markdown
 4. 不把长期不可得的 Tier 3 数据每天机械列为缺口。
 5. 不在公开仓库提交真实账户、持仓截图、历史交易报告和手工竞价数据。
 
-## 4. 演示路径
+## 5. 演示路径
 
 演示时优先展示数据接口和覆盖率如何约束后续报告：
 
