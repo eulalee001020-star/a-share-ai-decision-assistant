@@ -103,6 +103,11 @@
     .workspace {
       display: grid;
       gap: 18px;
+      min-width: 0;
+    }
+
+    .workspace > * {
+      min-width: 0;
     }
 
     .panel { padding: 16px; }
@@ -208,29 +213,6 @@
       display: block;
       font-size: 13px;
       margin-bottom: 7px;
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .tab {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
-      height: 36px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .tab.active {
-      color: #fff;
-      background: var(--blue);
-      border-color: var(--blue);
     }
 
     .hero-grid {
@@ -471,18 +453,13 @@
       line-height: 1.45;
     }
 
-    .emphasis {
-      outline: 2px solid #bfd1ff;
-      outline-offset: 2px;
-    }
-
     @media (max-width: 1180px) {
       main,
       .hero-grid,
       .ladder-grid,
       .sources-grid,
       .timeline {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
       }
 
       aside { position: static; }
@@ -511,8 +488,7 @@
       .three-grid,
       .sector-grid,
       .explain-grid,
-      .grid-two,
-      .tabs {
+      .grid-two {
         grid-template-columns: 1fr;
       }
 
@@ -577,30 +553,61 @@
         <input id="symbols" type="text" value="持仓 + 观察池 + 主线核心">
       </div>
 
-      <div class="field">
-        <label>阅读视角</label>
-        <div class="tabs" role="tablist" aria-label="阅读视角">
-          <button class="tab active" type="button" data-view="trader">交易员</button>
-          <button class="tab" type="button" data-view="pm">产品经理</button>
-          <button class="tab" type="button" data-view="beginner">新手</button>
-        </div>
-      </div>
-
-      <div class="context-card" id="viewHint">
-        <strong>交易员视角</strong>
-        <p>优先看市场权限、主线强弱、核心股承接、明日触发条件和不能交易的信号。</p>
-      </div>
-
-      <div class="context-card">
-        <strong>边界声明</strong>
-        <p>本页面展示的是决策辅助流程，不提供确定收益、不自动下单，也不替代用户最终判断。</p>
-      </div>
     </aside>
 
     <div class="workspace">
+      <section class="panel" id="flowSection">
+        <div class="panel-title">
+          <h2>Agent 决策链路</h2>
+          <span class="small">决策网络：数据健康门 → 市场状态 → 主线结构 → 消息证据 → 交易预案 → 复盘校准</span>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <section class="panel" id="marketSection">
+        <div class="panel-title">
+          <h2>市场与情绪复盘</h2>
+          <span class="small">公开行情样本：补齐指数、量能、赚钱效应、亏钱效应和短线梯队</span>
+        </div>
+        <div class="metrics-grid" id="emotionMetrics"></div>
+        <div class="ladder-grid">
+          <div>
+            <h3>连板梯队与高标反馈</h3>
+            <div class="ladder-list" id="ladderList"></div>
+          </div>
+          <div>
+            <h3>盘面解释</h3>
+            <div class="three-grid" id="marketNarrative"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="themeSection">
+        <div class="panel-title">
+          <h2>主线与多重共振</h2>
+          <span class="small">按一手数据拆解“产业逻辑、资金承接、梯队结构、次日验证”</span>
+        </div>
+        <div class="sector-grid" id="sectorGrid"></div>
+      </section>
+
+      <section class="panel" id="newsSection">
+        <div class="panel-title">
+          <h2>消息面证据检索</h2>
+          <span class="tag blue">RAG / Embedding</span>
+        </div>
+        <div class="sources-grid">
+          <div class="card">
+            <strong>消息面怎么进系统</strong>
+            <p id="ragIntro">交易所公告、上市公司公告、主流证券报新闻和行情终端数据进入消息面证据层。系统用关键词 + 向量召回，再按来源、时间、股票代码、主题和冲突关系重排。</p>
+            <div class="pill-row" id="ragPills"></div>
+          </div>
+          <div class="source-list" id="sourceList"></div>
+        </div>
+      </section>
+
       <section class="panel" id="decisionSection">
         <div class="panel-title">
-          <h2>今日结论与行动权限</h2>
+          <h2>输出结论与行动权限</h2>
           <span id="permissionTag" class="tag green">可做核心，不追后排</span>
         </div>
         <div class="hero-grid">
@@ -628,47 +635,6 @@
         <div class="summary-grid" id="summaryCards"></div>
       </section>
 
-      <section class="panel" id="marketSection">
-        <div class="panel-title">
-          <h2>市场与情绪复盘</h2>
-          <span class="small">补齐指数、量能、赚钱效应、亏钱效应和短线梯队</span>
-        </div>
-        <div class="metrics-grid" id="emotionMetrics"></div>
-        <div class="ladder-grid">
-          <div>
-            <h3>连板梯队与高标反馈</h3>
-            <div class="ladder-list" id="ladderList"></div>
-          </div>
-          <div>
-            <h3>盘面解释</h3>
-            <div class="three-grid" id="marketNarrative"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel" id="themeSection">
-        <div class="panel-title">
-          <h2>主线与多重共振</h2>
-          <span class="small">借鉴专业复盘的“逻辑-资金-梯队-验证”结构</span>
-        </div>
-        <div class="sector-grid" id="sectorGrid"></div>
-      </section>
-
-      <section class="panel" id="newsSection">
-        <div class="panel-title">
-          <h2>消息面证据检索</h2>
-          <span class="tag blue">RAG / Embedding</span>
-        </div>
-        <div class="sources-grid">
-          <div class="card">
-            <strong>消息面怎么进系统</strong>
-            <p>公告、新闻、研报摘要和产业链材料进入消息面证据层。系统用关键词 + 向量召回，再按来源、时间、股票代码、主题和冲突关系重排。</p>
-            <div class="pill-row" id="ragPills"></div>
-          </div>
-          <div class="source-list" id="sourceList"></div>
-        </div>
-      </section>
-
       <section class="panel" id="planSection">
         <div class="panel-title">
           <h2>明日预案与风控</h2>
@@ -690,14 +656,6 @@
         </div>
       </section>
 
-      <section class="panel" id="flowSection">
-        <div class="panel-title">
-          <h2>Agent 决策链路</h2>
-          <span class="small">产品动线：先看结论，再追溯证据，最后进入预案和复盘</span>
-        </div>
-        <div class="timeline" id="timeline"></div>
-      </section>
-
       <section class="panel" id="beginnerSection">
         <div class="panel-title">
           <h2>为什么会得出这个结论</h2>
@@ -709,103 +667,80 @@
   </main>
 
   <script>
-    const views = {
-      trader: {
-        title: "交易员视角",
-        text: "优先看市场权限、主线强弱、核心股承接、明日触发条件和不能交易的信号。",
-        focus: ["decisionSection", "marketSection", "planSection"]
-      },
-      pm: {
-        title: "产品经理视角",
-        text: "优先看页面动线、信息层级、数据健康门、RAG 证据层、输出权限和人机确认边界。",
-        focus: ["newsSection", "flowSection", "decisionSection"]
-      },
-      beginner: {
-        title: "新手视角",
-        text: "优先看每个结论背后的因果链：指数和量能影响仓位，主线强弱决定做什么，风险条件决定什么时候不做。",
-        focus: ["beginnerSection", "decisionSection", "themeSection"]
-      }
-    };
-
-    const tasks = {
-      morning: "盘前要确认是否允许开新仓，重点看竞价、情绪和主线核心是否同步。",
-      tail: "尾盘要复盘今日判断，判断隔夜价值，并准备次日竞价验证清单。",
-      theme: "主题筛选要回答主线是否成立、龙头和中军是谁、补涨是否还有性价比。",
-      stock: "单股深研要把盘口、K线、消息面、板块角色和风险收益统一到一个证据栈。"
-    };
-
     const scenarios = {
       rotation: {
         dataTag: ["样例数据", "green"],
         regime: ["轮动偏强", "amber"],
         permission: ["可做核心，不追后排", "amber"],
         risk: ["条件触发，不提前下注", "amber"],
-        headline: "主线有机会，但不支持无脑追高",
-        reason: "指数量能一般，赚钱效应集中在少数主线；策略上只允许核心票确认后的低风险参与，弱跟风和纯消息脉冲不进入计划。",
-        traderAction: "盯主线核心的分歧承接，若低于 VWAP 且板块不同步，取消新风险。",
-        beginnerSummary: "结论不是“明天涨跌”，而是“什么条件下可以做，什么条件下必须放弃”。",
+        headline: "化工日内最强，但指数与量能仍限制追高",
+        reason: "公开行情、公告与新闻样本显示：三大指数仍在 5 日均线下方且成交量萎缩，化工成为日内最强主线，AI硬件保持趋势人气，医药高标与亏钱效应并存。",
+        traderAction: "盯东岳硅材、宏昌电子、万华化学等化工前排的分化承接，同时看津药药业断板方式和新能泰山趋势是否延续。",
+        beginnerSummary: "板块强不等于所有个股都能追。要先看指数和量能，再看主线里的龙头、中军、补涨是否同步。",
         bars: {
-          "指数强度": 62,
-          "量能确认": 58,
-          "赚钱效应": 68,
-          "亏钱效应": 42,
-          "主线集中度": 70
+          "指数强度": 48,
+          "量能确认": 42,
+          "赚钱效应": 70,
+          "亏钱效应": 46,
+          "主线集中度": 76
         },
         summary: [
-          ["市场状态", "轮动偏强", "指数不差，但热点切换快"],
-          ["仓位权限", "4-5成上限", "只给核心确认，不给后排追高"],
-          ["主线质量", "一强两观察", "最强主线可跟踪，支线只看延续"],
-          ["数据等级", "A-", "结构化数据可用，消息面需引用"]
+          ["市场状态", "缩量轮动", "指数弱震荡，主线局部强"],
+          ["情绪锚点", "津药7板", "空间打开但独立性强"],
+          ["主线质量", "化工最强", "有龙头、中军和补涨结构"],
+          ["风险约束", "不追后排", "量能不足时缩短持股周期"]
         ],
         emotion: [
-          ["高标空间", "7板", "高标能打开空间，但断板反馈仍要盯"],
-          ["晋级状态", "中等", "有连板，但中位数量不足"],
-          ["断板反馈", "局部", "弱分支有亏钱效应"],
-          ["量能", "偏缩", "缩量环境下追高容错低"],
-          ["风格", "轮动", "低吸核心优于追后排"]
+          ["高标空间", "津药7板", "空间被打开，但医药属性带动有限"],
+          ["晋级状态", "75%", "连板晋级率回升，情绪边际改善"],
+          ["断板反馈", "重药断板", "创新药分化，联环药业触及跌停"],
+          ["量能", "缩量", "指数仍在5日线下，追高容错低"],
+          ["风格", "主线轮动", "化工强、AI硬件趋势、医药分化"]
         ],
         ladder: [
-          ["7板", "空间锚定", "若剧烈断板，短线情绪降级"],
-          ["3板", "人气先锋", "看开板承接，不看一字强弱本身"],
-          ["2板", "晋级竞争", "只有叠加主线逻辑的更值得看"],
-          ["首板", "试错池", "数量多但分散，说明持续性待验证"]
+          ["7板", "津药药业", "市场空间板，独立走势明显，断板反馈影响短线情绪"],
+          ["3板", "汇源通信", "光通信补涨先锋，一字强度需等开板承接验证"],
+          ["趋势", "新能泰山", "10天8板，AI硬件/算电协同方向人气核心"],
+          ["2板", "圣泉集团", "化工+AI 双属性，次日晋级质量是观察点"]
         ],
         narrative: [
-          ["为什么不是强进攻", "指数和量能没有形成强共振，赚钱效应集中而非全面扩散。"],
-          ["为什么不能追后排", "轮动日后排容易被兑现，只有核心票承接住才有正期望。"],
-          ["明天看什么", "看高标断板方式、主线核心承接、首板能否晋级形成梯队。"]
+          ["为什么不是强进攻", "公开行情样本显示三大指数仍收于5日均线之下，且成交量萎缩，指数和量能没有形成强共振。"],
+          ["为什么不能追后排", "化工首板数量多，但缩量轮动下后排容易被兑现；只有前排和中军承接住才有正期望。"],
+          ["明天看什么", "看津药药业断板方式、东岳硅材/宏昌电子分化承接、万华化学等中军是否继续放量。"]
         ],
         sectors: [
           {
             name: "化工/材料",
             status: ["日内主线", "green"],
-            score: 86,
-            resonance: ["政策", "供需", "涨价", "盈利", "资金"],
-            role: "看龙头、中军和补涨是否继续同步。",
-            verify: "分化后前排能否换手晋级，中军是否继续放量。"
+            score: 88,
+            resonance: ["政策反内卷", "供需收紧", "涨价", "业绩", "资金"],
+            role: "东岳硅材 20cm 秒板，宏昌电子 09:37 涨停，万华化学/宝丰能源作为趋势中军放量。",
+            verify: "分化后看东岳硅材、宏昌电子能否换手承接，中军是否继续放量。"
           },
           {
             name: "AI硬件/算力",
             status: ["趋势观察", "blue"],
-            score: 74,
-            resonance: ["产业", "业绩", "资金", "权重"],
-            role: "更适合趋势承接，不适合连续拉升后追高。",
-            verify: "看权重锚和趋势核心是否企稳。"
+            score: 78,
+            resonance: ["算电协同", "光通信", "PCB材料", "趋势核心"],
+            role: "汇源通信 3 连板一字，新能泰山 10 天 8 板，圣泉集团叠加化工与算力材料。",
+            verify: "看新能泰山趋势是否延续，以及寒武纪、中际旭创等权重锚是否企稳。"
           },
           {
             name: "医药/支线",
             status: ["高低分化", "amber"],
-            score: 51,
-            resonance: ["情绪", "个股", "事件"],
-            role: "高标独立，板块后排负反馈明显。",
-            verify: "除非高标超预期带动修复，否则风险大于机会。"
+            score: 44,
+            resonance: ["空间板", "负反馈", "分化"],
+            role: "津药药业 7 连板但独立性强，联环药业跌停，莱美药业、润都股份、广生堂大跌。",
+            verify: "除非津药药业超预期带动修复，否则医药后排风险大于机会。"
           }
         ],
         sources: [
-          ["公告/业绩", "用于验证催化质量，不能直接替代盘面承接。"],
-          ["行业新闻", "用于解释板块逻辑，需检查是否已经被价格兑现。"],
-          ["研报摘要", "作为外部观点引用，不当作事实本身。"]
+          ["上市公司公告", "上海证券报/中国证券网披露的东岳硅材2026年一季报显示：营业收入12.56亿元，归母净利润1.94亿元，同比+426.99%，扣非净利润2.16亿元，同比+452.47%；公司说明毛利率改善来自有机硅行业供需格局改善和产品价格回归合理区间。"],
+          ["行情终端", "同花顺当日行情与涨停数据用于确认盘面事实：东岳硅材20cm涨停、宏昌电子早盘涨停，津药药业为空间高标，汇源通信/新能泰山/圣泉集团构成连板与趋势观察对象。"],
+          ["产业新闻", "上海证券报/中国证券网有机硅报道显示，2026年以来有机硅价格持续攀升，核心驱动包含供给收缩和上游原料成本推动；这解释板块强度，但仍需行情承接验证。"],
+          ["风险证据", "同花顺当日跌幅与断板数据用于识别亏钱效应：重药控股断板，联环药业触及跌停，莱美药业、润都股份、广生堂大跌；系统据此降低医药后排优先级。"]
         ],
+        ragIntro: "当前样本只接入可追溯来源：交易所/上市公司公告、上海证券报/中国证券网新闻、同花顺当日行情与涨停数据。系统先召回材料，再判断哪些支持催化，哪些只能作为风险提示。",
         ragPills: ["混合检索", "来源日期", "冲突保留", "过期降权"],
         plans: [
           ["主线核心", "分歧后站回 VWAP，板块中军同步", "核心低于 VWAP 且后排掉队", "试错小仓，确认后再加", "核心是板块最能代表资金方向的标的。"],
@@ -859,7 +794,8 @@
           { name: "主线二", status: ["趋势强", "blue"], score: 79, resonance: ["业绩", "机构", "趋势"], role: "适合趋势确认，不适合情绪化追涨。", verify: "权重锚能否稳住 5/10 日线。" },
           { name: "低位新题材", status: ["试错", "amber"], score: 65, resonance: ["事件", "首板", "扩散"], role: "只能小仓观察，等梯队确认。", verify: "次日能否出现 2 板核心。" }
         ],
-        sources: [["公告", "直接催化有效，但仍需量价确认。"], ["产业新闻", "用于解释扩散方向。"], ["资金代理", "只作情绪参考，不证明真实机构意图。"]],
+        sources: [["交易所/公司公告", "直接催化只记录公告事实和披露日期，不能把公告标题直接等同于买入理由。"], ["上海证券报/中国证券网", "用于补充产业链变化、政策口径和公司公开回应，进入系统后仍需与行情承接交叉验证。"], ["同花顺行情数据", "涨跌幅、成交额、涨停时间、连板高度和资金分类只作盘面事实与情绪代理，不证明真实机构意图。"]],
+        ragIntro: "强进攻样本优先召回交易所/公司公告、上海证券报/中国证券网新闻和同花顺当日行情数据；即使消息面积极，也必须与成交、梯队和中军承接交叉验证。",
         ragPills: ["来源权威", "最近优先", "多文档交叉", "冲突降权"],
         plans: [
           ["龙头", "温和分歧后快速回封或站回 VWAP", "爆量长阴或板块不同步", "核心仓，分批", "龙头代表情绪，但也最容易在一致后分歧。"],
@@ -893,7 +829,8 @@
           { name: "防守高股息", status: ["抱团", "blue"], score: 62, resonance: ["避险", "趋势"], role: "用于观察风险偏好，不等于短线进攻。", verify: "指数弱时是否继续抗跌。" },
           { name: "前期主线", status: ["退潮边缘", "red"], score: 38, resonance: ["高位", "兑现"], role: "只看风险释放，不做追高。", verify: "核心是否止跌或继续补跌。" }
         ],
-        sources: [["利好新闻", "存在，但需要检查是否已被价格兑现。"], ["风险公告", "必须保留，进入不交易条件。"], ["研报摘要", "观点分歧，不作为事实结论。"]],
+        sources: [["同花顺行情数据", "保留同日涨跌幅、成交额、连板、跌停和炸板事实，先判断是否已经兑现。"], ["交易所公告", "风险公告和异常波动公告必须进入不交易条件，优先级高于题材想象。"], ["上海证券报/中国证券网", "公开产业新闻只作为背景材料，若与盘面反馈冲突，输出时必须降置信。"]],
+        ragIntro: "混沌样本重点不是找单边利好，而是保留正反材料：行情兑现、风险公告和公开产业新闻都进入上下文，输出时必须降置信。",
         ragPills: ["冲突保留", "引用一致", "旧消息降权", "未证实拒答"],
         plans: [
           ["核心抗跌", "分歧中不破关键位且板块回流", "高开低走或跌破 VWAP", "小仓试错", "混沌期只能用小仓买不确定。"],
@@ -922,7 +859,8 @@
           { name: "防守方向", status: ["观察", "blue"], score: 48, resonance: ["避险", "低波"], role: "降低波动，不做进攻替代。", verify: "是否只是临时抱团。" },
           { name: "新题材", status: ["等待", "amber"], score: 35, resonance: ["事件"], role: "退潮末期再观察首板质量。", verify: "冰点修复后是否走出 2 板核心。"}
         ],
-        sources: [["风险公告", "优先级高于利好传闻。"], ["情绪数据", "跌停、断板、A 杀是核心证据。"], ["旧催化", "不再作为买入理由。"]],
+        sources: [["风险公告", "交易所问询、异常波动、减持和业绩风险公告优先级高于利好传闻。"], ["同花顺情绪数据", "跌停、断板、炸板、A杀和昨日涨停反馈是核心风险证据。"], ["公开旧催化", "上海证券报/中国证券网等旧新闻若已被价格兑现，不再作为买入理由。"]],
+        ragIntro: "退潮样本优先召回风险公告、断板负反馈和已过期催化材料；消息面模块服务于风险识别，不用于寻找追涨理由。",
         ragPills: ["风险优先", "过期降权", "传闻拒答", "防守输出"],
         plans: [
           ["已有持仓", "反弹无量先减风险", "跌破结构止损", "按计划处理", "先处理错误，别用希望替代风控。"],
@@ -938,12 +876,10 @@
       ["01", "数据健康门", "先判断行情、分时、竞价、市场结构和消息来源是否足够。"],
       ["02", "市场状态", "用指数、量能、广度、情绪和亏钱效应决定仓位权限。"],
       ["03", "主线结构", "看龙头、中军、补涨、跟风和掉队是否同步。"],
-      ["04", "消息面检索", "用 RAG/Embedding 召回公告、新闻和研报摘要，并保留引用和冲突。"],
+      ["04", "消息面检索", "用 RAG/Embedding 召回交易所公告、公司公告、主流证券报新闻和行情终端数据，并保留引用和冲突。"],
       ["05", "交易预案", "把结论转成可做条件、取消条件、仓位和风险。"],
       ["06", "复盘校准", "记录成功/失败/噪音概率和实际结果，修正下次权重。"]
     ];
-
-    let currentView = "trader";
 
     function el(id) {
       return document.getElementById(id);
@@ -978,8 +914,6 @@
 
     function render() {
       const scenario = scenarios[el("scenario").value];
-      const taskText = tasks[el("taskMode").value];
-      const view = views[currentView];
 
       renderTag(el("dataTag"), scenario.dataTag);
       renderTag(el("permissionTag"), scenario.permission);
@@ -990,8 +924,6 @@
       el("headlineReason").textContent = scenario.reason;
       el("traderAction").textContent = scenario.traderAction;
       el("beginnerSummary").textContent = scenario.beginnerSummary;
-      el("viewHint").querySelector("strong").textContent = view.title;
-      el("viewHint").querySelector("p").textContent = view.text + " " + taskText;
 
       el("marketBars").innerHTML = Object.entries(scenario.bars).map(([name, value]) => {
         const inverse = name === "亏钱效应";
@@ -1061,6 +993,7 @@
       }).join("");
 
       el("ragPills").innerHTML = scenario.ragPills.map((item) => `<span class="pill">${item}</span>`).join("");
+      el("ragIntro").textContent = scenario.ragIntro;
       el("sourceList").innerHTML = scenario.sources.map(([title, text]) => `
         <div class="source-card">
           <strong>${title}</strong>
@@ -1090,8 +1023,6 @@
         </div>
       `).join("");
 
-      document.querySelectorAll(".emphasis").forEach((node) => node.classList.remove("emphasis"));
-      view.focus.forEach((id) => el(id)?.classList.add("emphasis"));
     }
 
     function updateClock() {
@@ -1107,15 +1038,6 @@
       });
       el("clock").textContent = formatter.format(new Date()) + " 上海时间";
     }
-
-    document.querySelectorAll(".tab").forEach((button) => {
-      button.addEventListener("click", () => {
-        currentView = button.dataset.view;
-        document.querySelectorAll(".tab").forEach((node) => node.classList.remove("active"));
-        button.classList.add("active");
-        render();
-      });
-    });
 
     ["runDate", "runTime", "taskMode", "scenario", "symbols"].forEach((id) => {
       el(id).addEventListener("input", render);
