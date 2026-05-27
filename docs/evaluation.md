@@ -2,6 +2,8 @@
 
 本项目的评估目标不是证明 AI 能预测市场，而是证明 AI 在高噪声、高风险场景里能稳定遵守数据边界、输出权限和风控纪律。
 
+评测样本、消息面 RAG/Embedding 评测和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。
+
 ## 1. 输出质量指标
 
 | 指标 | 合格标准 | 失败示例 |

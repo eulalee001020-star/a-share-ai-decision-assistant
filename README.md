@@ -8,10 +8,11 @@
 
 - 产品案例：[Product Case Study](docs/portfolio.md)
 - Agent 架构：[Investment Decision-Support Agent Architecture](docs/agent_architecture.md)
-- 互动 Demo：[数据接口、覆盖率与工作流链路 Demo](docs/demo/index.html)
+- 互动 Demo：[投资辅助 Agent 工作台 Demo](docs/demo/index.html)
 - 工作流说明：[Runbook](docs/runbook.md)
 - 数据与证据边界：[Data Source Requirements](docs/data_sources.md)
 - 预测与评估体系：[Prediction Automation System](docs/prediction_automation_system.md)
+- 评测集与失败案例：[Evaluation Cases And Iteration Notes](docs/evaluation_cases.md)
 - Prompt 样例：[09:28 竞价](prompts/auction_check.md)、[14:30 尾盘](prompts/tail_check.md)、[主题筛选](prompts/theme_screening.md)、[单股深研](prompts/single_stock_research.md)
 
 ## 真实市场需求
@@ -31,6 +32,7 @@ A 股交易者每天面对三个高频痛点：
 | 交易场景识别 | `docs/prediction_automation_system.md` | 强进攻、轮动、退潮、冰点修复、混沌五类状态 |
 | 风控发动机 | `config/portfolio.example.json`、`tools/trading_assistant.py` | 从止损距离倒推仓位，避免用主观信心定仓 |
 | 数据权限门 | `docs/data_sources.md` | A0/A1/A2/B1/B2/B3/C 分层，数据不足时自动降级 |
+| 消息面 RAG 设计 | `docs/evaluation_cases.md` | 公告/新闻/研报摘要的混合检索、引用一致性和过期拦截 |
 | Agent Prompt | `prompts/*.md` | 09:28、14:30、主题筛选、单股深研四类任务 |
 | 本地运行包 | `tools/trading_assistant.py render ...` | 自动组装上下文、配置校验、缺失数据和执行提示词 |
 | 预测复盘 | `prediction template/summary` | 事件概率、期望 R、结果日志与校准闭环 |
@@ -90,6 +92,7 @@ flowchart LR
 │   ├── agent_architecture.md          # 投资辅助决策 Agent 架构
 │   ├── demo/index.html                # 可互动 Demo
 │   ├── data_sources.md                # 数据分层与证据要求
+│   ├── evaluation_cases.md            # 评测集、失败案例与消息面 RAG 方案
 │   ├── prediction_automation_system.md
 │   └── runbook.md
 ├── prompts/                           # Agent 工作流 Prompt
