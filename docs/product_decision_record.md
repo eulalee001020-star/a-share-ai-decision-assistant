@@ -28,8 +28,9 @@ limits. The current architecture keeps the high-risk decisions outside the model
 
 ## 2. Data Health Gate Thresholds
 
-Current thresholds are conservative product defaults, not statistically final
-truth.
+Current thresholds are conservative product defaults. They now have one month of
+public-data replay as an initial calibration baseline; they are still not a
+claim of live investment alpha.
 
 | Rule | Current Default | Rationale | Future Calibration |
 | --- | --- | --- | --- |
@@ -38,8 +39,23 @@ truth.
 | Missing B1 market structure | Market regime confidence capped at medium | Individual stock signals degrade when breadth and limit-up feedback are unknown | Calibrate by regime-error rate |
 | Missing A0 account/risk | No sizing | Position size requires account and stop-distance context | Non-negotiable rule |
 
+Initial historical calibration:
+
+- Window: 2026-04-27 to 2026-05-27.
+- Public demo stocks: 002156.SZ, 600584.SH, 600601.SH, 600206.SH, 002886.SZ.
+- Samples: 20 trading days, 100 opening-confirmation observations, 100 tail-session observations.
+- Result: A1 reached >=80% coverage on 20/20 sampled days for both 09:28 confirmation proxy and 14:30.
+- A2 result: 0/20 public historical auction samples had true 09:15-09:25 auction amount, seal amount, post-09:20 cancellation, or queue data.
+
+See [Historical Threshold Calibration](historical_threshold_calibration.md).
+
 The important product point is that thresholds are visible and adjustable by
 validation, not hidden inside a prompt.
+
+The most important limitation remains A2: public historical data can support the
+"do not chase without A2" rule through opening-gap and first-15-minute volatility,
+but it cannot fully calibrate auction-specific fields. Production use still needs
+Tonghuashun/manual export or a licensed auction data source.
 
 ## 3. Model Vs Risk Engine Arbitration
 

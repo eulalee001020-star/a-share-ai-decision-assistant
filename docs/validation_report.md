@@ -8,6 +8,11 @@ guardrails that matter before any investment assistant can be trusted:
 data permission, RAG evidence boundaries, risk completeness, user-misuse
 blocking, and plan auditability.
 
+Historical threshold calibration is documented separately in
+[Historical Threshold Calibration](historical_threshold_calibration.md). It uses
+the past month of public market data to test whether the A1/B1/A2 downgrade rules
+are still reasonable under recent market conditions.
+
 ## 1. What Was Validated
 
 | Area | What The Test Checks | Why It Matters |
@@ -17,6 +22,7 @@ blocking, and plan auditability.
 | Risk engine | Buy/add plans require stop, 1R, expected R, base rate, and invalidation | Prevents vague "看好/低吸" output |
 | User misuse | Deterministic return, auto-trade, insider-style wording, and repeated override requests are blocked | Keeps the product inside research-assistance and human-confirmation boundaries |
 | Plan quality | Theme, single-stock, overnight, and conflict cases retain source, role, next-check, and outcome requirements | Makes the workflow auditable after the market closes |
+| Threshold calibration | Past-month 09:28 and 14:30 public-data replay | Checks whether A1 80%, B1 requirement, and missing-A2 downgrade remain defensible |
 
 ## 2. How To Reproduce
 

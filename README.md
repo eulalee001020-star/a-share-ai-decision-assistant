@@ -14,6 +14,7 @@
 - 预测与评估体系：[Prediction Automation System](docs/prediction_automation_system.md)
 - 评测集与失败案例：[Evaluation Cases And Iteration Notes](docs/evaluation_cases.md)
 - 公开验证报告：[Public Validation Report](docs/validation_report.md)
+- 历史阈值校准：[Historical Threshold Calibration](docs/historical_threshold_calibration.md)
 - 产品决策记录：[Product Decision Record](docs/product_decision_record.md)
 - Prompt 样例：[09:28 竞价](prompts/auction_check.md)、[14:30 尾盘](prompts/tail_check.md)、[主题筛选](prompts/theme_screening.md)、[单股深研](prompts/single_stock_research.md)
 
@@ -41,6 +42,7 @@ A 股交易者每天面对三个高频痛点：
 | Agent 架构 | `docs/agent_architecture.md` | 用最小必要模块串起数据、推理、风控和复盘 |
 | 可审计产物 | `examples/workflow_trace.sample.json`、`examples/run_packet.sample.md` | 证明数据包、运行包、预测日志和复盘日志如何串起来 |
 | 公开验证集 | `tools/portfolio_validation.py`、`docs/validation_report.md` | 30 条离线 guardrail 用例，覆盖数据缺失、RAG、风控、用户误用和计划完整性 |
+| 历史阈值校准 | `tools/historical_threshold_calibration.py`、`docs/historical_threshold_calibration.md` | 过去一个月 20 个交易日、100 个 09:28 观察、100 个 14:30 观察，校准 A1/B1/A2 降级规则 |
 
 ## 快速体验
 
@@ -54,6 +56,7 @@ python3 tools/trading_assistant.py render auction --date 2026-05-22 --stdout
 python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 0928 --automation auction
 python3 tools/trading_assistant.py prediction template --date 2026-05-22 --automation auction
 python3 tools/portfolio_validation.py --format markdown
+python3 tools/historical_threshold_calibration.py --start-date 2026-04-27 --end-date 2026-05-27
 ```
 
 如果没有本地私有配置，工具会自动读取 `config/portfolio.example.json`。真实使用时复制一份私有配置：
@@ -112,6 +115,8 @@ python3 tools/portfolio_validation.py --format markdown
 ```
 
 当前公开验证集包含 30 条离线 guardrail 用例，验证数据权限、RAG 证据边界、风控完整性、用户误用拦截和计划可审计性。该验证不声称投资收益，只证明产品约束可以被重复检查。
+
+历史阈值校准见 `docs/historical_threshold_calibration.md`：过去一个月公开数据支持保留 A1 80% 覆盖阈值和 B1 市场结构要求；公开历史源无法提供 A2 竞价明细，因此缺 A2 时仍只能输出 09:30-09:45 确认条件，禁止追强。
 
 ## 风险声明
 

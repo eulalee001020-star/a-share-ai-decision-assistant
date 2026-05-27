@@ -138,6 +138,8 @@ python3 tools/portfolio_validation.py --format markdown
 
 该验证不证明投资收益，只证明产品规则和输出边界可以被重复检查。
 
+阈值校准见 [Historical Threshold Calibration](historical_threshold_calibration.md)。过去一个月公开数据覆盖 20 个交易日、100 个 09:28 开盘确认观察和 100 个 14:30 尾盘观察，支持保留 A1 80% 覆盖阈值、B1 市场结构要求和缺 A2 时禁止追强的降级规则。
+
 已识别的关键迭代：
 
 1. 初版只靠 Prompt 约束，模型仍可能直接给交易动作；后续加入数据健康门和输出权限。
@@ -210,7 +212,7 @@ python3 tools/portfolio_validation.py --format markdown
 ## 12. 下一阶段
 
 1. 接入更稳定的交易日历和实时行情源，降低手工数据依赖。
-2. 用真实历史 run packet 扩充 replay 验证，覆盖 20 个 09:28 样本、20 个 14:30 样本和 50 个消息面查询。
+2. 在已完成过去一个月公开数据阈值校准的基础上，继续补真实 prediction/outcome replay，覆盖概率分桶、Brier score、expected-R 偏差和 50 个消息面查询。
 3. 增加用户行为日志：是否按计划执行、是否出现计划外交易。
 4. 分离短线、波段、配置型策略，避免不同时间尺度的规则互相污染。
 5. 形成一页版和面试讲解版作品集，用同一套证据支撑不同展示深度。
