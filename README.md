@@ -31,6 +31,7 @@
 
 - [AI Portfolio Overview](docs/ai_portfolio_submission.md): 作品集总览
 - [Project Proof](docs/project_proof.md): 问题定义、用户流程、架构、评测、失败迭代和个人贡献
+- Product Delivery Evidence: [PRD Excerpt](docs/prd_excerpt.md)、[Launch Metrics](docs/launch_metrics.md)、[Project Plan](docs/project_plan.md)
 - [Product Case Study](docs/portfolio.md): 产品案例与取舍
 - [Interactive Demo](docs/demo/index.html): Agent 工作台 Demo
 - [Agent Architecture](docs/agent_architecture.md): 架构与模块边界
@@ -63,6 +64,9 @@ A 股交易者每天面对三个高频痛点：
 | Agent 架构 | `docs/agent_architecture.md` | 用最小必要模块串起数据、推理、风控和复盘 |
 | 可审计产物 | `examples/workflow_trace.sample.json`、`examples/run_packet.sample.md` | 证明数据包、运行包、预测日志和复盘日志如何串起来 |
 | 项目证明材料 | `docs/project_proof.md` | 问题定义、原流程/新流程、产品化架构、评测用例、失败迭代、成本边界和个人贡献 |
+| PRD 片段 | `docs/prd_excerpt.md` | 以 09:35 开盘承接确认为例，展示用户故事、功能范围、输入输出、异常降级、验收标准和埋点 |
+| 上线指标 | `docs/launch_metrics.md` | 展示从 MVP 到试点应追踪的产品可用性、AI 质量、风险行为、成本和稳定性指标 |
+| 项目推进 | `docs/project_plan.md` | 展示需求、PRD、数据、Agent、风控、验证、Demo、灰度和生产化评审的交付计划 |
 | 公开验证集 | `tools/portfolio_validation.py`、`docs/validation_report.md` | 37 条离线 guardrail 用例，覆盖数据缺失、RAG、风控、用户误用、用户给定对象、开盘承接和计划完整性 |
 | 历史阈值校准 | `tools/historical_threshold_calibration.py`、`docs/historical_threshold_calibration.md` | 过去一个月 20 个交易日、100 个 09:28 观察、100 个 14:30 观察，校准 A1/B1/A2 降级规则 |
 | 历史权限回测 | `tools/historical_policy_backtest.py`、`docs/historical_policy_backtest.md` | 101 只主板样本股、57,558 个 stock-day、827 个开盘追强候选，验证缺 A2 禁止 09:28 追强的风险控制有效性 |
@@ -141,6 +145,10 @@ flowchart LR
 ├── config/portfolio.example.json      # 脱敏样例组合
 ├── docs/
 │   ├── portfolio.md                   # 产品案例说明
+│   ├── project_proof.md               # 项目证明材料
+│   ├── prd_excerpt.md                 # PRD 片段
+│   ├── launch_metrics.md              # 上线指标与反馈闭环
+│   ├── project_plan.md                # 项目推进计划
 │   ├── agent_architecture.md          # 投资辅助决策 Agent 架构
 │   ├── demo/index.html                # 可互动 Demo
 │   ├── data_sources.md                # 数据分层与证据要求

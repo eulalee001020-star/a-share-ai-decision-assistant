@@ -30,7 +30,7 @@ A 股投资辅助决策 Agent 是一套面向盘前和盘中交易决策的 AI �
 
 项目中的每个模块都保留了可追踪证据：需求和边界写入产品文档，关键规则写入配置和 Prompt，运行器生成可审计包，测试用例验证输出权限，历史 replay 用于检查保守规则是否仍然合理。公开版本不把这些验证包装成收益证明，只说明系统约束可以被重复检查。
 
-完整证明材料见 [Project Proof](project_proof.md)：该页面按问题定义、用户流程、产品化架构、评测体系、失败迭代、部署边界和个人贡献展开，适合作为项目页阅读。
+完整证明材料见 [Project Proof](project_proof.md)：该页面按问题定义、用户流程、产品化架构、评测体系、失败迭代、部署边界和个人贡献展开，适合作为项目页阅读。交付型能力证据见 [PRD Excerpt](prd_excerpt.md)、[Launch Metrics](launch_metrics.md) 和 [Project Plan](project_plan.md)。
 
 ## 4. 真实问题
 
@@ -60,6 +60,9 @@ AI 在系统中负责证据组织、冲突分析和自然语言计划表达；�
 | --- | --- |
 | AI 产品问题定义 | `docs/portfolio.md`、`docs/product_overview.md` |
 | 完整项目证明 | `docs/project_proof.md` |
+| PRD 和验收标准 | `docs/prd_excerpt.md` |
+| 上线指标和反馈闭环 | `docs/launch_metrics.md` |
+| 项目推进和风险管理 | `docs/project_plan.md` |
 | Agent 工作流设计 | `docs/agent_architecture.md`、`docs/runbook.md` |
 | Prompt 工程 | `prompts/*.md`、`docs/workflow_prompts_io.md` |
 | 上下文与运行包 | `tools/trading_assistant.py render ...`、`examples/run_packet.sample.md` |

@@ -93,6 +93,7 @@ Guardrail：禁止自动下单、禁止收益承诺、缺证据降级、资金�
 | Prompt contract | 固定事实、推理、计划、风险和复盘字段 | `prompts/*.md` |
 | 风控引擎 | 用止损距离、账户风险预算和市场状态倒推仓位 | `config/portfolio.example.json`、`tools/trading_assistant.py` |
 | 评测与回测 | 验证 guardrail、权限规则和缺 A2 降级纪律 | `docs/validation_report.md`、`tools/portfolio_validation.py` |
+| 交付证明 | 展示 PRD、验收指标、反馈闭环和项目推进计划 | `docs/prd_excerpt.md`、`docs/launch_metrics.md`、`docs/project_plan.md` |
 | Demo | 展示用户侧的任务选择、数据健康、权限和计划生成 | `docs/demo/index.html` |
 
 ## 5. 核心 AI 机制
@@ -210,12 +211,25 @@ python3 tools/portfolio_validation.py --format markdown
 | Prompt contract | 编写 09:28、14:30、主题、单股、用户综合请求等 Prompt | `prompts/*.md` |
 | 工程实现 | 实现 CLI、样例配置、数据健康、运行包、历史权限回测和验证工具 | `tools/trading_assistant.py`、`tools/historical_policy_backtest.py` |
 | 评测设计 | 设计 37 条 guardrail、失败样本、权限回测和校准方案 | `tools/portfolio_validation.py`、`docs/validation_report.md` |
+| 交付推进 | 补齐 PRD 片段、上线指标、反馈闭环和生产化推进计划 | `docs/prd_excerpt.md`、`docs/launch_metrics.md`、`docs/project_plan.md` |
 | 风险取舍 | 定义不自动下单、不承诺收益、缺数据降级、资金流代理和隐私隔离 | `docs/privacy_and_compliance.md`、`.gitignore` |
 | 展示交付 | 建立 README 首屏、静态 Demo、截图和作品集说明 | `docs/demo/index.html`、`docs/assets/demo-workbench.png` |
 
 开发过程中使用 AI 工具加速代码草稿、文档整理和测试迭代；产品边界、架构取舍、风控规则、验证标准和公开内容由个人审阅和定稿。
 
-## 11. 结果与边界
+## 11. 产品交付证明
+
+为了让作品集不仅停留在架构说明，项目补充了三类交付材料：
+
+| 材料 | 证明什么 | 说明 |
+| --- | --- | --- |
+| `docs/prd_excerpt.md` | PRD 写作和需求落地能力 | 以 09:35 开盘承接确认为例，写清用户故事、功能范围、输入输出、异常降级、AI 输出契约、验收标准和埋点 |
+| `docs/launch_metrics.md` | 上线验收和效果跟进能力 | 定义产品可用性、AI 质量、风险行为、成本、延迟和反馈标签，不把指标包装成收益证明 |
+| `docs/project_plan.md` | 项目管理和推进能力 | 展示从问题定义、PRD、数据、Agent、风控、验证、Demo 到灰度试点的阶段计划和风险清单 |
+
+这些补充材料只服务于项目 1 的主线：AI 架构、Agent、guardrail、评测和风险边界。服务行业竞品、客服 Copilot、工单 Agent 等内容更适合作为独立项目，不混入本项目叙事。
+
+## 12. 结果与边界
 
 当前已经做到：
 
@@ -223,7 +237,7 @@ python3 tools/portfolio_validation.py --format markdown
 2. 有可重复执行的 37 条 guardrail 验证。
 3. 有大样本公开日线权限回测，用于压力测试缺 A2 不追强规则。
 4. 有 Prompt、运行包、输入输出样例、Demo、验证报告和隐私边界。
-5. 有明确的失败案例、迭代记录和下一步校准路径。
+5. 有 PRD 片段、上线指标、项目推进计划、失败案例、迭代记录和下一步校准路径。
 
 当前还没有做到：
 
