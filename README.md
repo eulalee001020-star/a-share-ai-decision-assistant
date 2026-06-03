@@ -30,6 +30,7 @@
 ## Quick Links
 
 - [AI Portfolio Overview](docs/ai_portfolio_submission.md): 作品集总览
+- [Project Proof](docs/project_proof.md): 问题定义、用户流程、架构、评测、失败迭代和个人贡献
 - [Product Case Study](docs/portfolio.md): 产品案例与取舍
 - [Interactive Demo](docs/demo/index.html): Agent 工作台 Demo
 - [Agent Architecture](docs/agent_architecture.md): 架构与模块边界
@@ -61,6 +62,7 @@ A 股交易者每天面对三个高频痛点：
 | 预测复盘 | `prediction template/summary` | 事件概率、期望 R、结果日志与校准闭环 |
 | Agent 架构 | `docs/agent_architecture.md` | 用最小必要模块串起数据、推理、风控和复盘 |
 | 可审计产物 | `examples/workflow_trace.sample.json`、`examples/run_packet.sample.md` | 证明数据包、运行包、预测日志和复盘日志如何串起来 |
+| 项目证明材料 | `docs/project_proof.md` | 问题定义、原流程/新流程、产品化架构、评测用例、失败迭代、成本边界和个人贡献 |
 | 公开验证集 | `tools/portfolio_validation.py`、`docs/validation_report.md` | 37 条离线 guardrail 用例，覆盖数据缺失、RAG、风控、用户误用、用户给定对象、开盘承接和计划完整性 |
 | 历史阈值校准 | `tools/historical_threshold_calibration.py`、`docs/historical_threshold_calibration.md` | 过去一个月 20 个交易日、100 个 09:28 观察、100 个 14:30 观察，校准 A1/B1/A2 降级规则 |
 | 历史权限回测 | `tools/historical_policy_backtest.py`、`docs/historical_policy_backtest.md` | 101 只主板样本股、57,558 个 stock-day、827 个开盘追强候选，验证缺 A2 禁止 09:28 追强的风险控制有效性 |

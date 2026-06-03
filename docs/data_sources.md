@@ -20,7 +20,7 @@ For the current product, "best data" means the most complete data that can be ac
 Operational recommendation:
 
 1. For free/local use, run A1/B1 collection and public historical replay every day; this is enough to keep guardrails disciplined.
-2. For the best version of the application, add a licensed or terminal-export layer for historical 1-minute data and A2 auction data. Without it, do not claim 09:35 confirmation alpha or 09:28 auction alpha.
+2. For the best version of the application, add a licensed or terminal-export layer for historical 1-minute data and A2 auction data. Without it, do not claim independent 09:35 confirmation value or 09:28 auction value.
 3. Cache every fetched dataset by date, code, source, and retrieval time. Reproducibility matters more than having a larger but untraceable feed.
 4. If two sources conflict, keep both and lower confidence; do not silently choose the value that supports the trade.
 

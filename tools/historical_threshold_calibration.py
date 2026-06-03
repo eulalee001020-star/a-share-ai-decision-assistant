@@ -411,7 +411,7 @@ def render_markdown(result: dict[str, Any]) -> str:
             "",
             "## Boundary",
             "",
-            "This is a historical data-health and guardrail calibration. It does not prove live alpha, and it does not replace a full prediction/outcome replay with Brier score and expected-R error. The missing A2 conclusion is especially important: historical public APIs were insufficient, so production use still requires Tonghuashun/manual auction export or another licensed auction source.",
+            "This is a historical data-health and guardrail calibration. It does not prove live return capability, and it does not replace a full prediction/outcome replay with Brier score and expected-R error. The missing A2 conclusion is especially important: historical public APIs were insufficient, so production use still requires Tonghuashun/manual auction export or another licensed auction source.",
             "",
         ]
     )

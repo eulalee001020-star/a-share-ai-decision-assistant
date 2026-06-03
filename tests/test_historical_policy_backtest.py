@@ -165,7 +165,7 @@ class HistoricalPolicyBacktestTests(unittest.TestCase):
         markdown = historical_policy_backtest.render_markdown(summary)
 
         self.assertIn("Historical Policy Backtest", markdown)
-        self.assertIn("does not prove live investment alpha", markdown)
+        self.assertIn("does not prove live return capability", markdown)
         self.assertIn("manual or licensed A2 samples", markdown)
 
 

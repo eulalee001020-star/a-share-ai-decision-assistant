@@ -76,7 +76,7 @@ class HistoricalThresholdCalibrationTests(unittest.TestCase):
         markdown = historical_threshold_calibration.render_markdown(result)
         self.assertIn("A2 historical auction available", markdown)
         self.assertIn("Keep missing-A2 downgrade", markdown)
-        self.assertIn("does not prove live alpha", markdown)
+        self.assertIn("does not prove live return capability", markdown)
 
 
 if __name__ == "__main__":

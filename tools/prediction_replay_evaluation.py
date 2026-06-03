@@ -1,6 +1,6 @@
 """Evaluate prediction/outcome logs and behavior-risk logs.
 
-The goal is not to prove trading alpha. This tool checks whether probability
+The goal is not to prove trading returns. This tool checks whether probability
 claims, expected-R estimates, and user-risk interventions are measurable.
 """
 

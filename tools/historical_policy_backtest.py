@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Large-sample historical policy backtest for the A-share assistant.
 
-This is a guardrail and permission-policy backtest, not a stock-picking alpha
+This is a guardrail and permission-policy backtest, not a stock-picking return
 backtest. It asks whether the product's conservative rules, especially "no
 opening chase without A2", reduce historically observable high-risk actions.
 """
@@ -566,7 +566,7 @@ def render_markdown(summary: dict[str, Any]) -> str:
     lines = [
         "# Historical Policy Backtest",
         "",
-        "This validates permission and guardrail effectiveness. It does not prove live investment alpha.",
+        "This validates permission and guardrail effectiveness. It does not prove live return capability.",
         "",
         "## Sample",
         "",
@@ -638,7 +638,7 @@ def render_markdown(summary: dict[str, Any]) -> str:
             f"- Explicit 09:35 samples: {summary.get('confirmation_sample_count', 0)}.",
             f"- Confirmed: {summary.get('confirmation_confirmed_count', 0)}; failed: {summary.get('confirmation_failed_count', 0)}.",
             f"- Confirmation lift mean R: {format_number(summary.get('confirmation_lift_mean_result_r_daily_proxy'))}.",
-            "- If explicit 09:35 samples are zero, the confirmation layer is implemented but not validated by this run. Do not infer 09:35 alpha from daily bars.",
+            "- If explicit 09:35 samples are zero, the confirmation layer is implemented but not validated by this run. Do not infer independent 09:35 decision value from daily bars.",
             "- When 09:35 samples exist, the confirmation result still uses daily high/low as a coarse path proxy unless true post-09:35 minute bars are supplied.",
             "",
             "## Product Decision",

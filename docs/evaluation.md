@@ -1,6 +1,6 @@
 # Evaluation And Calibration
 
-本项目的评估目标不是证明 AI 能预测市场，而是证明 AI 在高噪声、高风险场景里能稳定遵守数据边界、输出权限和风控纪律。
+本项目的评估目标不是证明 AI 可以判断短期价格方向，而是证明 AI 在高噪声、高风险场景里能稳定遵守数据边界、输出权限和风控纪律。
 
 评测样本、消息面 RAG/Embedding 评测和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。公开 guardrail 验证结果见 [Public Validation Report](validation_report.md)。base rate、expected R 和用户行为风险证明方案见 [Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md)。
 

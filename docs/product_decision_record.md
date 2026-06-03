@@ -30,7 +30,7 @@ limits. The current architecture keeps the high-risk decisions outside the model
 
 Current thresholds are conservative product defaults. They now have one month of
 public-data replay as an initial calibration baseline; they are still not a
-claim of live investment alpha.
+claim of live return capability.
 
 | Rule | Current Default | Rationale | Future Calibration |
 | --- | --- | --- | --- |
@@ -97,7 +97,7 @@ Rolling three-month reliability replay:
   be used to loosen 09:28 permissions or publish precise base rates.
 
 This supports the product decision to keep "missing A2 = no 09:28 chase" as a
-risk permission rule. It still does not prove live alpha or validate true
+risk permission rule. It still does not prove live return capability or validate true
 Level-2 auction queue/cancellation evidence. The operational path is to downgrade
 missing-A2 candidates into 09:35 absorption confirmation, not to abandon all
 post-open research.
@@ -249,7 +249,7 @@ Better metrics:
 | Plan-outside-trade rate | Measures whether users still violate their own plan |
 | No-stop trade rate | Measures whether high-risk trades still happen without a stop |
 | User override rate | Measures whether users bypass guardrails after warnings |
-| Average review time | Measures productivity without claiming alpha |
+| Average review time | Measures productivity without claiming investment returns |
 | Outcome-log completion rate | Measures whether the system creates learning data |
 | Probability calibration error | Measures overconfidence rather than raw return |
 

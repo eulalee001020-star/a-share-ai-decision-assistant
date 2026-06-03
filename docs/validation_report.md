@@ -3,7 +3,7 @@
 This report closes the evidence gap between "architecture is designed" and
 "the portfolio can be inspected with a repeatable validation command".
 
-The public repository does not claim live investment alpha. It validates the
+The public repository does not claim live return capability. It validates the
 guardrails that matter before any investment assistant can be trusted:
 data permission, RAG evidence boundaries, risk completeness, user-misuse
 blocking, user-supplied target handling, opening-confirmation discipline, holding-review discipline, and plan
@@ -89,8 +89,8 @@ Historical policy backtest result:
 | Explicit 09:35 confirmation samples | 0 |
 
 This supports keeping the no-A2 no-chase rule. It does not validate true
-auction queue, cancellation, sealing-order evidence, or 09:35 confirmation
-alpha; those still require manual or licensed A2/minute samples. The role split
+auction queue, cancellation, sealing-order evidence, or the independent value
+of 09:35 confirmation; those still require manual or licensed A2/minute samples. The role split
 supports a stricter execution rule: weak followers stay blocked, while
 leader/core/trend proxies may enter post-open confirmation.
 
@@ -150,4 +150,4 @@ For public portfolio purposes, the honest claim is:
 
 > The system has a repeatable guardrail validation pack and a clear path to
 > historical replay validation. Large-sample public data supports the conservative
-> no-A2 opening-chase rule, but the system does not claim proven long-term alpha.
+> no-A2 opening-chase rule, but the system does not claim proven long-term return capability.

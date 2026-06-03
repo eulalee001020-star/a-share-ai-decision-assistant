@@ -1,6 +1,6 @@
 # Historical Policy Backtest
 
-This validates permission and guardrail effectiveness. It does not prove live investment alpha.
+This validates permission and guardrail effectiveness. It does not prove live return capability.
 
 ## Sample
 
@@ -59,7 +59,7 @@ Data source: Tencent public adjusted daily K-line, fetched through `tools/histor
 - Explicit 09:35 samples: 0.
 - Confirmed: 0; failed: 0.
 - Confirmation lift mean R: NA.
-- If explicit 09:35 samples are zero, the confirmation layer is implemented but not validated by this run. Do not infer 09:35 alpha from daily bars.
+- If explicit 09:35 samples are zero, the confirmation layer is implemented but not validated by this run. Do not infer independent 09:35 decision value from daily bars.
 - When 09:35 samples exist, the confirmation result still uses daily high/low as a coarse path proxy unless true post-09:35 minute bars are supplied.
 
 ## Product Decision
