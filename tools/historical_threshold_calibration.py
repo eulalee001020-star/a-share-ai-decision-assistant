@@ -288,7 +288,7 @@ def build_samples(
                 "avg_abs_open_gap_pct": mean(opening_gaps),
                 "avg_first_15m_range_pct": mean(opening_ranges),
                 "gap_up_fade_rate": rate([item for item in opening_gap_fades if item is not None]),
-                "permission": "缺 A2：只允许 09:30-09:45 确认，禁止追强。",
+                "permission": "缺 A2：只允许 09:35首确认/09:45二次确认，禁止09:28追强。",
             }
         )
         tail_samples.append(
@@ -358,7 +358,7 @@ def render_markdown(result: dict[str, Any]) -> str:
         f"| B1 market structure available | {summary['b1_days_available']}/{summary['sample_days']} days | Missing B1 still caps regime confidence at medium |",
         f"| A2 historical auction available | {summary['a2_days_available']}/{summary['sample_days']} days | Keep missing-A2 downgrade; requires Tonghuashun/manual export |",
         f"| Avg abs open gap | {number(summary['avg_abs_open_gap_pct'])}% | Opening risk is non-trivial, no chase without A2 |",
-        f"| Avg first-15m range | {number(summary['avg_first_15m_range_pct'])}% | Use 09:30-09:45 confirmation when A2 missing |",
+        f"| Avg first-15m range | {number(summary['avg_first_15m_range_pct'])}% | Use 09:35 first confirmation and 09:45 secondary confirmation when A2 missing |",
         f"| Gap-up faded by 09:45 | {number((summary['gap_up_fade_rate'] or 0) * 100)}% | Positive open alone is insufficient |",
         f"| Avg 14:30-to-close absolute move | {number(summary['avg_abs_tail_to_close_pct'])}% | Tail plans need close confirmation and stop |",
         f"| Avg next-open absolute gap | {number(summary['avg_abs_next_open_gap_pct'])}% | Overnight plans need next-day auction validation |",
@@ -405,7 +405,7 @@ def render_markdown(result: dict[str, Any]) -> str:
             "## Calibrated Answers",
             "",
             "1. A1 80% threshold is retained. In this replay, A1 daily/MA/15-minute coverage reached the threshold on the sampled days. Lower coverage should still downgrade output because cross-stock comparison and VWAP/MA checks become incomplete.",
-            "2. Missing A2 auction data is not treated as a small warning. Public historical sources did not expose 09:15-09:25 auction amount, post-09:20 cancel behavior, seal amount, or queue data. The replay shows opening gaps and first-15-minute ranges are material enough that the system should keep the rule: no chase, only 09:30-09:45 confirmation.",
+            "2. Missing A2 auction data is not treated as a small warning. Public historical sources did not expose 09:15-09:25 auction amount, post-09:20 cancel behavior, seal amount, or queue data. The replay shows opening gaps and first-15-minute ranges are material enough that the system should keep the rule: no 09:28 chase, only 09:35 first confirmation and 09:45 secondary confirmation.",
             "3. B1 remains a required regime input. Limit-up and limit-down counts changed materially across the month, so a stock-only view is not enough to classify strong attack, rotation, or retreat with high confidence.",
             "4. Tail-session plans still need next-day auction validation. The 14:30-to-close and next-open gap statistics show that tail strength is not equivalent to next-day executable confirmation.",
             "",

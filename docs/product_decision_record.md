@@ -35,7 +35,7 @@ claim of live investment alpha.
 | Rule | Current Default | Rationale | Future Calibration |
 | --- | --- | --- | --- |
 | A1 quote/minute/MA coverage | >= 80% for high-confidence stock-level output | Below this, cross-stock comparison becomes unreliable | Replay historical run packets and compare downgrade decisions |
-| Missing A2 auction data | No chase; only 09:30-09:35 confirmation | Opening strength cannot be inferred from prior close | Compare auction-confirmed vs non-confirmed plans |
+| Missing A2 auction data | No 09:28 chase; only 09:30-09:35 confirmation | Opening strength cannot be inferred from prior close, but post-open absorption can be verified from public minute data | Compare auction-confirmed vs 09:35-confirmed plans |
 | Missing B1 market structure | Market regime confidence capped at medium | Individual stock signals degrade when breadth and limit-up feedback are unknown | Calibrate by regime-error rate |
 | Missing A0 account/risk | No sizing | Position size requires account and stop-distance context | Non-negotiable rule |
 
@@ -47,7 +47,8 @@ Initial historical calibration:
 - Result: A1 reached >=80% coverage on 20/20 sampled days for both 09:28 confirmation proxy and 14:30.
 - A2 result: 0/20 public historical auction samples had true 09:15-09:25 auction amount, seal amount, post-09:20 cancellation, or queue data.
 
-See [Historical Threshold Calibration](historical_threshold_calibration.md) and
+See [Historical Threshold Calibration](historical_threshold_calibration.md),
+[Historical Policy Backtest](historical_policy_backtest.md), and
 [Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md).
 
 The important product point is that thresholds are visible and adjustable by
@@ -56,10 +57,72 @@ also explicit: do not optimize for "more trade opportunities" first. Optimize
 for lower false-permission rate first, then evaluate whether the rule is too
 strict.
 
-The most important limitation remains A2: public historical data can support the
-"do not chase without A2" rule through opening-gap and first-15-minute volatility,
-but it cannot fully calibrate auction-specific fields. Production use still needs
-Tonghuashun/manual export or a licensed auction data source.
+The most important limitation remains A2, but A2 is not the product's only
+evidence layer. Public historical data can support the "do not chase without A2"
+rule through opening-gap and first-15-minute volatility, while public minute data
+can support 09:35 absorption checks. What public data cannot fully calibrate is
+auction-specific queue, cancellation, and sealing-order behavior. Production use
+still needs Tonghuashun/manual export or a licensed auction data source if the
+product wants to act before 09:35.
+
+Large-sample policy backtest:
+
+- Window: 2024-01-01 to 2026-05-27.
+- Universe: 101 main-board sample stocks from `config/backtest_universe.example.csv`.
+- Sample size: 57,558 stock-days and 827 opening-chase candidates.
+- Unsafe opening chase without A2 produced a 61.1% false-permission proxy rate,
+  47.5% daily 1R stop-hit rate, and 52.5% gap-fade rate.
+- Missed-valid-plan proxy was 29.0%, so the product must keep a 09:35 re-screen
+  path for high-quality candidates instead of only blocking.
+- Role proxy split: weak-follower proxy false permission was 93.6%, leader/core
+  proxy was 17.6%, and trend/anchor proxy was 19.3%.
+
+Rolling three-month reliability replay:
+
+- Window: 2026-02-28 to 2026-05-27, ending on the last complete trading-day
+  data before the 2026-05-28 session.
+- Universe: 99 main-board sample stocks with available Tencent public daily bars.
+- Sample size: 5,635 stock-days and 60 opening-chase candidates.
+- Unsafe opening chase without A2 produced a 55.0% false-permission proxy rate,
+  33.3% daily 1R stop-hit rate, 51.7% gap-fade rate, and -0.185 mean expected-R
+  error.
+- Missed-valid-plan proxy was 25.0%, so the system should not discard all
+  blocked candidates; it should re-screen eligible core candidates at 09:35.
+- Role proxy split was decisive: weak-follower proxy false permission was
+  100.0%, leader/core proxy was 9.1%, and trend/anchor proxy was 0.0%.
+- Explicit 09:35 confirmation samples were 0 in this public daily-bar run, so
+  confirmation lift remains an implemented metric, not a proven edge.
+- Product decision: the recent window supports retaining the missing-A2 downgrade,
+  but the 60-candidate sample is below the 300-candidate threshold and must not
+  be used to loosen 09:28 permissions or publish precise base rates.
+
+This supports the product decision to keep "missing A2 = no 09:28 chase" as a
+risk permission rule. It still does not prove live alpha or validate true
+Level-2 auction queue/cancellation evidence. The operational path is to downgrade
+missing-A2 candidates into 09:35 absorption confirmation, not to abandon all
+post-open research.
+
+### Data Provider Decision
+
+External comments correctly point to the same bottleneck: when data is missing,
+strategy quality is not testable. The product decision is to improve the data
+gateway before adding more prediction logic.
+
+Provider candidates are separated by use:
+
+| Provider Type | Role | Product Decision |
+| --- | --- | --- |
+| Public Sina/Tencent/AKShare | Free A1/B1 baseline | Keep, but never depend on it as the only production path |
+| QMT/PTrade/掘金/broker terminals | Production-candidate A1/A2/B1 | Verify account permission and export schema first; import into the same health gate |
+| 聚宽/Tushare | Historical replay and optional specialty data | Use for calibration and slow variables unless live fields are verified |
+| yfinance | Overseas market convenience | Do not use as A-share intraday source |
+| Fincep or other new tools | Candidate provider | Run a field, timestamp, and conflict audit before trusting |
+| Manual screenshots/CSV | Fast A2/B1补数 | Allow only when source, timestamp, and fields are saved |
+
+The first concrete bridge is `sector-flow` manual import. It can satisfy B1
+board-capital migration context, but it cannot unlock stock-level buy/add when
+A1 quote/minute/VWAP remains missing. This preserves the risk gate while letting
+the user use QMT/PTrade/聚宽/terminal exports immediately.
 
 ## 3. Model Vs Risk Engine Arbitration
 
@@ -97,7 +160,7 @@ Current public scope:
 | --- | --- |
 | Source types | Exchange/company announcements, company disclosures, Shanghai Securities News / cnstock-style public news, and market terminal data |
 | Retrieval design | Hybrid keyword + embedding retrieval with metadata filters |
-| Current repo proof | Product design, evaluation cases, and guardrail validation |
+| Current repo proof | Product design, evaluation cases, guardrail validation, and `message-evidence` template/summary commands |
 | Not claimed | Production vector database, low-latency realtime RAG service, or complete paid-data integration |
 
 ## 5. How "Priced In" Is Assessed
@@ -128,6 +191,8 @@ Current rule:
 2. If no historical base rate exists, the output must say "待校准" and use a
    broad interval instead of pseudo-precision.
 3. Predictions without outcome logs cannot be used to claim win rate.
+4. Outcome logs should be generated from prediction rows first, then completed
+   with actual result and error type after market verification.
 
 Implementation rule:
 
@@ -139,6 +204,8 @@ Implementation rule:
 3. `tools/prediction_replay_evaluation.py` computes probability buckets,
    Brier score, multiclass Brier, expected-R error, and missing base-rate
    fields from prediction/outcome logs.
+4. `python3 tools/trading_assistant.py prediction outcome-template --date YYYY-MM-DD --automation auction`
+   reduces missing outcome rows by turning each prediction into a review task.
 
 The product value is not "we know the exact probability today". It is "we force
 probability claims into a log structure that can be audited later".
@@ -200,6 +267,13 @@ The minimum fields are `plan_id`, `attempted_action`, `violated_rules`,
 `user_override`. This allows the product to prove whether it reduced
 unplanned/no-stop/override behavior before making any claim about account-level
 outcomes.
+
+Current local entry points:
+
+```bash
+python3 tools/trading_assistant.py prediction behavior-template --date YYYY-MM-DD --automation auction
+python3 tools/trading_assistant.py review weekly --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+```
 
 ## 10. Compliance Boundary
 

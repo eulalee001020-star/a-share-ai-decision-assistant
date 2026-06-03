@@ -12,13 +12,13 @@
 
 ### 当前结论
 
-当前 `A1 >= 80%`、`缺 A2 禁止追强`、`缺 B1 市场状态降置信` 是保守产品阈值。它们的目标不是最大化交易机会，而是防止模型在关键数据缺失时越权输出。
+当前 `A1 >= 80%`、`缺 A2 禁止 09:28 追强`、`缺 B1 市场状态降置信` 是保守产品阈值。它们的目标不是最大化交易机会，而是防止模型在关键数据缺失时越权输出。
 
 已完成的验证：
 
 | 证据 | 当前状态 |
 | --- | --- |
-| 离线 guardrail 验证 | 30 条用例，覆盖数据缺失、RAG、风控、误用和计划完整性 |
+| 离线 guardrail 验证 | 37 条用例，覆盖数据缺失、RAG、风控、误用、用户给定对象、开盘承接和计划完整性 |
 | 过去一个月公开行情 replay | 20 个交易日、100 个 09:28 开盘确认观察、100 个 14:30 尾盘观察 |
 | A1 阈值 | 样本内 09:28 代理和 14:30 均达到 20/20 天覆盖 |
 | B1 市场结构 | AKShare/Eastmoney 涨跌停池样本内 20/20 天可用 |
@@ -35,8 +35,24 @@
 | 阶段 | 数据 | 方法 | 产出 |
 | --- | --- | --- | --- |
 | P0 已完成 | 公开日线、15 分钟线、涨跌停池 | 检查 A1/B1 覆盖和缺 A2 时的开盘波动风险 | `docs/historical_threshold_calibration.md` |
-| P1 待补齐 | 同花顺截图/手工导出/授权竞价数据 | 记录竞价额、封单、撤单、龙头/中军/跟风排序 | A2 样本库 |
-| P2 校准 | 预测日志 + 结果日志 | 比较不同阈值下的误放行率、误拦截率和 expected-R 偏差 | 阈值版本记录 |
+| P0+ 已完成 | 101 只主板样本股、57,558 个 stock-day | 比较缺 A2 仍追强的误放行、止损和高开回落风险 | `docs/historical_policy_backtest.md` |
+| P0+ 已完成 | 过去三个月 99 只主板样本股、5,635 个 stock-day | 检查近期市场窗口是否支持继续保留缺 A2 降级 | `docs/reliability_backtest_3m.md` |
+| P0+ 已落地 | 09:35 公开分时数据 | 用开盘价、VWAP、板块核心票同步和止损距离确认缺 A2 候选 | `docs/opening_permission_model.md` |
+| P1 已有入口、待持续补样 | 同花顺截图/手工导出/授权竞价数据 | 记录竞价额、封单、撤单、龙头/中军/跟风排序，并统计核心字段覆盖 | `data/manual/auction/` + `auction-samples` |
+| P2 已有模板、待扩大样本 | 预测日志 + 结果日志 | 比较不同阈值下的误放行率、误拦截率和 expected-R 偏差 | `reports/predictions/` + `reports/outcomes/` |
+
+当前本地入口：
+
+```bash
+python3 tools/trading_assistant.py auction-template --date YYYY-MM-DD
+python3 tools/trading_assistant.py auction-csv-template --date YYYY-MM-DD --codes 当日核心票1 当日核心票2
+python3 tools/trading_assistant.py auction-import-csv --date YYYY-MM-DD --input data/manual/auction/YYYY-MM-DD.csv
+python3 tools/trading_assistant.py auction-samples --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+python3 tools/trading_assistant.py auction-calibration --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+python3 tools/historical_policy_backtest.py --start-date 2024-01-01 --end-date 2026-05-27
+python3 tools/historical_policy_backtest.py --start-date 2026-02-28 --end-date 2026-05-27 --output docs/historical_policy_backtest_3m.md --json-output reports/backtests/historical_policy_backtest_3m.json
+python3 tools/trading_assistant.py prediction outcome-template --date YYYY-MM-DD --automation auction
+```
 
 ### 验收标准
 
@@ -49,7 +65,9 @@
 | Opening Confirmation Error | 09:28 结论到 09:35 被证伪的比例 | 用于校准 A2 权重 |
 | Tail Overnight Error | 14:30 计划到次日竞价被证伪的比例 | 用于校准隔夜风险 |
 
-缺 A2 时，不允许为了提高机会数而直接放宽追强权限。只有拿到真实 A2 样本，并证明 auction-confirmed 计划显著优于 non-confirmed 计划，才允许调整。
+缺 A2 时，不允许为了提高机会数而直接放宽 09:28 追强权限。正确处理是降级为 09:35 承接确认。只有拿到真实 A2 样本，并证明 auction-confirmed 计划显著优于 09:35-confirmed / non-confirmed 计划，才允许调整。
+
+当前大样本公开回测给出的产品判断是：缺 A2 仍追强的代理策略误放行率为 61.1%，日内触发 1R 止损率为 47.5%，高开回落率为 52.5%。大样本角色代理分层显示，弱跟风代理误放行率 93.6%，龙头/核心代理 17.6%，趋势/中军代理 19.3%；机会错杀代理为 29.0%。过去三个月滚动回测的方向一致：整体误放行率 55.0%，1R 止损触发率 33.3%，高开回落率 51.7%，弱跟风代理误放行率 100.0%，龙头/核心代理 9.1%，趋势/中军代理 0.0%；但 2% 高开追强候选只有 60 个，低于 300 个最低候选阈值。因此，在真实 A2 样本尚未完成前，禁止 09:28 追强不是“保守偏好”，而是已被公开历史样本支持、且未被近期市场推翻的权限规则；优化方向是收窄放行对象、补 09:35 confirmation lift，而不是整体放宽。
 
 ## 2. Base Rate 与 Expected R
 
@@ -95,6 +113,14 @@ python3 tools/prediction_replay_evaluation.py \
 4. Expected-R error：检查 `expected_r` 与实际 `result_r` 的偏差。
 5. base rate 缺失和样本量不足数量：防止伪精确。
 
+为了降低 outcome 漏记，先用 prediction 生成结果模板：
+
+```bash
+python3 tools/trading_assistant.py prediction outcome-template --date YYYY-MM-DD --automation auction
+```
+
+注意：空 outcome 模板不进入样本统计；只有填写 actual、result_r、error_type 或 evidence 后，周度复盘才把它视为完成样本。
+
 ### 产品规则
 
 任何计划如果缺少以下字段，不能写成高置信结论：
@@ -123,7 +149,11 @@ python3 tools/prediction_replay_evaluation.py \
 
 ### 行为日志字段
 
-真实使用时新增行为日志：
+当前通过行为模板记录真实使用中的风险事件：
+
+```bash
+python3 tools/trading_assistant.py prediction behavior-template --date YYYY-MM-DD --automation auction
+```
 
 ```json
 {
@@ -163,7 +193,15 @@ python3 tools/prediction_replay_evaluation.py \
 | Baseline | 记录 2-4 周未强制干预前的计划外交易、无止损交易和复盘完成率 | 得到个人风险行为基线 |
 | Intervention | 开启数据健康门、风控确认、outside-plan 标记和冷静期 | 验证产品是否改变行为 |
 | Matched Regime | 按强进攻、轮动、退潮、混沌分组比较 | 避免把市场环境变化误认为产品效果 |
-| Review | 周度复盘概率校准、expected-R 偏差和行为指标 | 形成下一版规则 |
+| Review | 周度复盘概率校准、expected-R 偏差和行为指标 | 通过 `review weekly` 形成下一版规则 |
+
+周度复盘入口：
+
+```bash
+python3 tools/trading_assistant.py review weekly --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+```
+
+空 behavior 模板不等于行为样本；至少需要记录 attempted_action、violated_rules、guardrail_action、executed、outside_plan、stop_present 或 user_override 之一。
 
 ### 对外表达
 

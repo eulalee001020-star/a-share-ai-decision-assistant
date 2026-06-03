@@ -8,7 +8,7 @@ This document defines the project as an investment decision-support agent, not a
 | --- | --- | --- |
 | Clear architecture | Every module has a single role and explicit input/output | Data gateway, health gate, context packet, reasoning workflows, risk engine, audit logs |
 | Low complexity | Keep the core runnable locally with minimal dependencies | Python CLI + JSON config + Markdown prompts + static demo |
-| Evidence-based reasoning | No conclusion can outrun the available data | A0/A1/A2/B1/B2/B3/C data layers and output permission rules |
+| Evidence-based reasoning | No conclusion can outrun the available data | Stable-data weights, A0/A1/A2/B1/B2/B3/C data layers, and machine-readable output permission rules |
 | Operational discipline | Every plan must define trigger, stop, target, invalidation, and do-not-trade condition | Prompt contracts and risk engine checks |
 | Decision-quality improvement | Improve decision quality through review and calibration | Prediction JSONL, outcome JSONL, behavior-risk JSONL, error types, weekly review |
 
@@ -31,14 +31,14 @@ flowchart LR
 | Module | Responsibility | Input | Output |
 | --- | --- | --- | --- |
 | Data Gateway | Collect market, minute, MA, breadth, and optional proxy data | Codes, date, time, enabled layers | CSV/JSON data package |
-| Data Health Gate | Decide what the system is allowed to conclude | Data coverage, available layers | Grade A/B/C/D and restrictions |
+| Data Health Gate | Decide what the system is allowed to conclude | Data coverage, available layers, `config/decision_weights.json` | Grade A/B/C/D, stable-data readiness score, and action permission ceiling |
 | Run Packet Builder | Assemble all context needed for a run | Config, watchlist, risk rules, data gaps, prompt | Auditable Markdown run packet |
-| Reasoning Workflows | Structure market, sector, and stock judgment | Run packet + prompt contract | Facts, inferences, candidate plans |
+| Reasoning Workflows | Structure market, sector, stock, user-supplied target, and holding judgment | Run packet + prompt contract | Facts, inferences, candidate plans |
 | Risk Engine | Convert stops and regime caps into position limits | Account, stop distance, regime, loss limits | Max size, risk in R, invalidation |
 | Decision Plan | Produce human-readable action plan | Evidence + risk engine | Buy/hold/reduce/observe plan, or no-trade condition |
 | Audit Logs | Preserve machine-readable predictions, results, and behavior-risk events | Event probabilities, actual outcomes, user overrides | JSONL prediction/outcome/behavior rows |
 | Calibration Review | Find systematic mistakes | Logs, behavior metrics, and error types | Weight adjustments and next-run guardrails |
-| Guardrail Validation | Regression-test data, RAG, risk, misuse, and plan-quality controls | Public validation cases | 30-case offline validation report |
+| Guardrail Validation | Regression-test data, RAG, risk, misuse, user-supplied inputs, opening-confirmation, and plan-quality controls | Public validation cases | 37-case offline validation report |
 
 ## 3. Data Layers And Permissions
 
@@ -46,12 +46,14 @@ flowchart LR
 | --- | --- | --- |
 | A0 | Account, holdings, cash, cost, risk budget | Required for any sizing |
 | A1 | Quote, open/high/low, turnover, VWAP, minute data, MA | Required for stock-level evidence |
-| A2 | Call auction, seal amount, queue/cancel signal, manual screenshot import | Required for high-confidence opening conclusions |
+| A2 | Call auction, seal amount, queue/cancel signal, manual screenshot import | Optional early-permission layer; required only for 09:28 chase or auction-outperformance claims |
 | B1 | Market breadth, limit-up/down, sector structure, sentiment | Required for market regime |
 | B2/B3 | Chips, fund-flow proxy, Dragon-Tiger, margin, holder data | Probability modifiers only |
 | C | News, announcements, IR, earnings driver data | Catalyst and thesis update |
 
 The rule is simple: missing data lowers output permission automatically. The model must not fill gaps with invented facts.
+
+`config/decision_weights.json` makes the permission model explicit. The primary 100-point readiness score assigns weight to market regime and losing-money effect, sector resonance, 09:35 absorption, risk-reward/liquidity, K-line relative strength, and source-backed catalysts. A2 auction, fund-flow proxy, chips, holder, and margin data are optional modifiers only; they can improve confidence or advance timing, but they cannot override A0/A1/B1, stop distance, or market-regime gates.
 
 ## 4. Core Workflow
 
@@ -59,12 +61,33 @@ The rule is simple: missing data lowers output permission automatically. The mod
 2. Collect or import the required data package.
 3. Run `data-health` to assign output permission.
 4. Build a run packet with context, data gaps, risk rules, and prompt contract.
-5. Produce the research plan using fixed analysis order:
+5. If the user supplied sectors/stocks/holding questions, render the `user` packet so those targets enter the same data health gate as holdings and watchlist.
+6. Produce the research plan using fixed analysis order:
    market regime, macro, sector, stock evidence, resonance, stage, operation, risk.
-6. Write prediction rows for every event that needs calibration.
-7. Record outcome rows after the event window closes.
-8. Record behavior-risk rows when a user attempts plan-outside, no-stop, or guardrail-violating actions.
-9. Review mistakes by error type: scenario error, base-rate error, factor overweight, data missing, unclear execution, or user override.
+7. Write prediction rows for every event that needs calibration.
+8. Record outcome rows after the event window closes.
+9. Record behavior-risk rows when a user attempts plan-outside, no-stop, or guardrail-violating actions.
+10. Review mistakes by error type: scenario error, base-rate error, factor overweight, data missing, unclear execution, or user override.
+
+### External Data Provider Loop
+
+The agent should treat every external provider as a data gateway adapter, not as a new reasoning layer. For QMT, PTrade, 掘金, 聚宽, Tushare, Sina, yfinance, Fincep-style tools, or screenshots:
+
+1. Export or fetch raw data.
+2. Cache the raw response or CSV with source and timestamp.
+3. Normalize it into A1/A2/B1/C2 fields.
+4. Run `data-health`.
+5. Let the existing risk engine decide output permission.
+
+The first implemented external-data bridge is manual B1 sector-flow import:
+
+```bash
+python3 tools/trading_assistant.py sector-flow template --date YYYY-MM-DD
+python3 tools/trading_assistant.py sector-flow import-csv --date YYYY-MM-DD --input data/manual/sector_flow/YYYY-MM-DD.csv
+python3 tools/trading_assistant.py data-health --date YYYY-MM-DD --time 1430 --automation tail
+```
+
+This restores board-capital migration context when public B1 APIs fail. It does not replace A1 price, minute, VWAP, or moving-average evidence, so stock-level buy/add permission remains blocked if A1 is missing.
 
 ## 5. Cost And Complexity Control
 
@@ -105,10 +128,11 @@ This does not guarantee stable profit. It creates a process where risk, evidence
 
 ## 7. Validation Boundary
 
-The public repository includes `tools/portfolio_validation.py`, a 30-case
+The public repository includes `tools/portfolio_validation.py`, a 37-case
 offline guardrail validation set. It checks whether the product rules handle
 data gaps, RAG source conflicts, missing stops, deterministic-return requests,
-auto-trade requests, and plan-quality gaps.
+auto-trade requests, user-supplied sectors/stocks, holding-review bias, and
+plan-quality gaps.
 
 This validation is intentionally scoped:
 

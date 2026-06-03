@@ -27,6 +27,15 @@ python3 tools/trading_assistant.py collect stock-data --code {CODE} --date {YYYY
 
 Use the generated `reports/{YYYY-MM-DD}-{CODE}-1430-stock-data.csv/json` as the primary evidence for quote, intraday minute/VWAP, turnover, volume ratio, visible five-level order book, moving averages, market activity, sector/concept fund-flow proxy, optional individual fund-flow, shareholder, news, and Dragon-Tiger data. Do not repeat chronic optional-layer failures as boilerplate. State a missing optional layer only when it directly affects the conclusion, or when the user supplied a screenshot/export that conflicts with the collector.
 
+If public B1 sector/concept data fails but the user provides a terminal screenshot, QMT/PTrade/掘金/聚宽 export, or manual board-capital migration table, import it before judging the sector layer:
+
+```bash
+python3 tools/trading_assistant.py sector-flow import-csv --date {YYYY-MM-DD} --input data/manual/sector_flow/{YYYY-MM-DD}.csv --source "manual/terminal"
+python3 tools/trading_assistant.py sector-flow summary --date {YYYY-MM-DD}
+```
+
+This only restores B1 sector-flow context. It does not replace A1 quote/minute/VWAP evidence for the individual stock.
+
 Before any buy/add/hold conclusion:
 
 1. Load `docs/trading_system_upgrade.md` and `config.portfolio.risk_engine`.
@@ -105,6 +114,7 @@ Judge:
 5. Whether capital continues flowing into the sector.
 6. Whether sector turnover share is overcrowded.
 7. Whether the leader remains strong and whether there is displacement risk.
+8. Whether `data/manual/sector_flow/{date}.json` shows board-capital migration into or out of the sector, including source time and confidence.
 
 Conclusion: 主线 / 轮动 / 退潮 / 无效题材, with confidence.
 

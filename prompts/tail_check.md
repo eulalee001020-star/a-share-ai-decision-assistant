@@ -65,6 +65,7 @@ expected_r = success_probability × target_r - failure_probability × 1R - noise
 ```
 
 No tail buy is allowed if expected R is not positive, stop is missing, or next-day auction validation is unclear.
+Tail buy/add plans must also pass role filtering: weak followers and pure catch-up names do not receive standard overnight risk. Use regime-level 1R budgets as the default risk input; the account-level hard cap is not a normal trade budget.
 
 ## Required Output
 

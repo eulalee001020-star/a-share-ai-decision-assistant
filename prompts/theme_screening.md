@@ -10,6 +10,7 @@ Run context:
 4. Use `stock_selection_preferences`; treat `preferred_themes` only as explicit current user input if non-empty.
 5. Fresh market data is mandatory for final ranking. If market data cannot be fetched, output only a provisional stock pool and mark ranking confidence as low.
 6. Do not recommend any trade without stop conditions, position cap, invalidation criteria, 1R, and reward-R.
+7. If public B1 sector data fails but the user provides board-capital migration data from QMT/PTrade/掘金/聚宽/terminal screenshots, first import it with `sector-flow import-csv`; treat it as B1 sector-flow context only, not as A1 stock-level confirmation.
 
 Primary objective:
 
@@ -20,6 +21,7 @@ Required process:
 1. Build a stock pool for each active theme confirmed by current data:
    - Market breadth and turnover concentration
    - Sector/theme fund-flow ranking where available
+   - Manual or external `sector-flow` board-capital migration records where available
    - Leader/core/catch-up feedback
    - Current holdings and user-added intraday observation names
    - Overnight external-market mapping where relevant

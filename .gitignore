@@ -3,7 +3,16 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 data/manual/
+data/vendor/
 config/portfolio.json
 docs/trading_assistant_state.md
+AGENTS.md
+.agents/
+.codex/
+docs/automation_specs/
+output/
+tmp/
+portfolio_submission/
+tools/build_portfolio_submission.py
 reports/*
 !reports/.gitkeep

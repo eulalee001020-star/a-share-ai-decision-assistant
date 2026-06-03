@@ -1,0 +1,62 @@
+{
+  "version": "2026-05-28-stable-data-permission",
+  "purpose": "Make stable, repeatable, auditable data the primary decision layer. Hard-to-get data can modify confidence or advance timing, but cannot override the permission gate.",
+  "readiness_thresholds": {
+    "full_plan": 75,
+    "confirmation_plan": 65,
+    "defensive_only_below": 40
+  },
+  "primary_weights": {
+    "market_regime_and_losing_money_effect": {
+      "weight": 25,
+      "required_layers": ["B1"],
+      "description": "Market breadth, limit-up/down structure, sentiment, and losing-money effect."
+    },
+    "sector_resonance_and_role": {
+      "weight": 20,
+      "required_layers": ["B1"],
+      "description": "Leader, core anchor, catch-up, follower, and sector breadth comparison."
+    },
+    "opening_absorption_0935": {
+      "weight": 20,
+      "required_layers": ["A1", "B1"],
+      "description": "Price versus open, VWAP, first-five-minute absorption, and sector synchronization."
+    },
+    "risk_reward_liquidity": {
+      "weight": 20,
+      "required_layers": ["A0", "A1"],
+      "description": "Structural stop, stop distance, liquidity, expected R, and account risk budget."
+    },
+    "kline_relative_strength": {
+      "weight": 10,
+      "required_layers": ["A1"],
+      "description": "Daily/minute structure, moving averages, volume, and relative strength."
+    },
+    "source_backed_catalyst": {
+      "weight": 5,
+      "required_layers": ["C2"],
+      "description": "Structured announcement, news, IR, or industry-chain evidence with source and timestamp."
+    }
+  },
+  "optional_modifiers": {
+    "a2_auction_early_permission": {
+      "max_abs_delta": 8,
+      "rule": "Only advances eligible action from 09:35 confirmation to 09:28 early permission."
+    },
+    "fund_flow_proxy": {
+      "max_abs_delta": 3,
+      "rule": "Vendor-classified proxy only; never true institutional intent."
+    },
+    "chips_holder_margin_structure": {
+      "max_abs_delta": 5,
+      "rule": "Slow structure modifier; not an intraday hard trigger."
+    }
+  },
+  "non_negotiable_gates": [
+    "No A0: no sizing or buy/add/reduce/sell advice.",
+    "No A1: no high-confidence stock plan.",
+    "No B1: market-regime confidence cannot exceed medium.",
+    "No A2: no 09:28 chase-strength and no auction-outperformance claim.",
+    "Any buy/add plan still needs market permission, structural stop, target R, invalidation, and do-not-trade condition."
+  ]
+}

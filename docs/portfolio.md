@@ -77,7 +77,7 @@ flowchart LR
 
 关键约束：
 
-1. 缺 A2 竞价层时，不允许说“竞价超预期”，只能给 09:30-09:35 确认条件。
+1. 缺 A2 竞价层时，不允许说“竞价超预期”，只能给 09:30-09:35 承接确认条件；确认后仍要看市场状态、板块共振、VWAP/开盘价和止损距离。
 2. 缺 B1 市场层时，市场状态置信度不得高于中。
 3. 缺 A0 账户/持仓层时，不能给仓位建议。
 
@@ -130,7 +130,7 @@ flowchart LR
 
 完整评测集和失败案例见 [Evaluation Cases And Iteration Notes](evaluation_cases.md)。阈值、base rate 和用户风险行为的专项方案见 [Calibration And Risk Proof Plan](calibration_and_risk_proof_plan.md)。
 
-公开验证结果见 [Public Validation Report](validation_report.md)。当前仓库提供 30 条离线 guardrail 用例，覆盖数据缺失、RAG 证据边界、风控完整性、用户误用拦截和计划可审计性。验证命令：
+公开验证结果见 [Public Validation Report](validation_report.md)。当前仓库提供 37 条离线 guardrail 用例，覆盖数据缺失、RAG 证据边界、风控完整性、用户误用拦截、用户给定对象、开盘承接和计划可审计性。验证命令：
 
 ```bash
 python3 tools/portfolio_validation.py --format markdown
@@ -139,6 +139,8 @@ python3 tools/portfolio_validation.py --format markdown
 该验证不证明投资收益，只证明产品规则和输出边界可以被重复检查。
 
 阈值校准见 [Historical Threshold Calibration](historical_threshold_calibration.md)。过去一个月公开数据覆盖 20 个交易日、100 个 09:28 开盘确认观察和 100 个 14:30 尾盘观察，支持保留 A1 80% 覆盖阈值、B1 市场结构要求和缺 A2 时禁止追强的降级规则。
+
+历史权限回测见 [Historical Policy Backtest](historical_policy_backtest.md)。大样本公开日线回测覆盖 101 只主板样本股、57,558 个 stock-day 和 827 个开盘追强候选，支持“缺 A2 不允许 09:28 追强”的风险权限规则。过去三个月可靠性回测见 [过去三个月可靠性回测](reliability_backtest_3m.md)：99 只主板样本股、5,635 个 stock-day、60 个开盘追强候选中，缺 A2 仍追强的代理策略误放行率为 55.0%，日内触发 1R 止损率为 33.3%，高开回落率为 51.7%；新增角色代理分层后，弱跟风代理组误放行率为 100.0%，龙头/核心代理组为 9.1%，趋势/中军代理组为 0.0%。该窗口支持继续保留缺 A2 降级，并把 09:35 放行对象收窄到核心/中军/趋势确认票；但不用于放宽 09:28 权限或证明长期收益。
 
 概率与风险行为 replay 工具：
 
@@ -213,7 +215,7 @@ python3 tools/prediction_replay_evaluation.py \
 | 真实问题定义 | 从盘前/盘中交易决策痛点出发，而不是从 AI 功能出发 |
 | AI 适用性判断 | 明确 AI 负责证据组织，规则负责权限和风控，用户负责最终确认 |
 | RAG/Embedding 理解 | 在消息面证据层设计混合检索、元数据过滤、引用一致性和过期拦截 |
-| Agent 工作流设计 | 09:28、14:30、主题筛选、单股深研四类任务 |
+| Agent 工作流设计 | 09:28、14:30、主题筛选、单股深研、用户综合分析五类任务 |
 | 上下文管理 | 运行包收敛持仓、风控、数据缺口和 Prompt 契约 |
 | 模型不确定性控制 | 数据等级、输出权限、缺失降级、拒绝确定性预测 |
 | 工程协作意识 | CLI、样例配置、单元测试、GitHub Actions、静态 Demo |

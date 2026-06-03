@@ -91,7 +91,7 @@ python3 tools/prediction_replay_evaluation.py \
 2. 不自动下单，不调用券商交易接口。
 3. 不把 vendor-classified fund flow 解释为真实机构意图。
 4. 不把长期不可得的 Tier 3 数据每天机械列为缺口。
-5. 不在公开仓库提交真实账户、持仓截图、历史交易报告和手工竞价数据。
+5. 公开仓库不包含真实账户、持仓截图、历史交易报告和手工竞价数据。
 
 ## 5. 演示路径
 

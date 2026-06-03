@@ -14,10 +14,18 @@
   "single_stock_limit_pct": 35,
   "max_loss_per_trade_pct": 2,
   "risk_engine": {
-    "version": "public-demo-2026",
-    "position_sizing_method": "先定义结构止损和1R亏损预算，再倒推出仓位；固定仓位上限只作为天花板，不作为买入理由。",
-    "risk_unit": "1R = 单笔计划最大亏损金额。每个买入、加仓、持有计划都必须说明亏多少是错、赚多少开始保护利润。",
-    "base_risk_budget_pct": 2,
+    "version": "public-demo-2026-regime-risk-budget",
+    "position_sizing_method": "先定义结构止损和1R亏损预算，再倒推出仓位；单笔硬上限只作为风控天花板，不作为常规下注额度。",
+    "risk_unit": "1R = 单笔计划最大亏损金额。常规1R按市场状态收缩，每个买入、加仓、持有计划都必须说明亏多少是错、赚多少开始保护利润。",
+    "base_risk_budget_pct": 0.75,
+    "hard_max_loss_per_trade_pct": 2,
+    "regime_risk_budget_pct": {
+      "强进攻日": 1,
+      "轮动日": 0.5,
+      "退潮日": 0,
+      "冰点修复日": 0.5,
+      "混沌日": 0.25
+    },
     "daily_stop_loss_pct": 1.5,
     "weekly_stop_loss_pct": 4,
     "monthly_drawdown_review_pct": 8,

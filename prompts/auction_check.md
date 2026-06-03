@@ -7,9 +7,9 @@ This automation is no longer a market-summary report. It must produce scenario c
 ## Run Context
 
 1. Default run time: Asia/Shanghai or Asia/Singapore 09:28, after 09:15-09:25 call auction has ended.
-2. Use `config/portfolio.json`, `docs/trading_assistant_state.md`, `docs/trading_system_upgrade.md`, `docs/data_sources.md`, `docs/prediction_automation_system.md`, the 09:28 run packet, user screenshots, local Tonghuashun-readable information, and collector output when available.
+2. Use `config/portfolio.json`, `docs/trading_assistant_state.md`, `docs/trading_system_upgrade.md`, `docs/data_sources.md`, `docs/opening_permission_model.md`, `docs/prediction_automation_system.md`, the 09:28 run packet, user screenshots, local Tonghuashun-readable information, and collector output when available.
 3. Do not read or wait for 08:55 or 09:10 morning reports.
-4. If A2 auction data is missing, do not infer auction strength from prior close. Downgrade output to a 09:30-09:35 confirmation checklist and explicitly prohibit chase-strength plans.
+4. If A2 auction data is missing, do not infer auction strength from prior close. Downgrade output to a 09:30-09:35 confirmation checklist and explicitly prohibit 09:28 chase-strength plans.
 5. All conclusions must separate facts, inference, probabilities, and trading plan.
 
 ## Data Gate
@@ -18,8 +18,8 @@ Before any trading conclusion, classify data quality:
 
 | Grade | Required Evidence | Permission |
 | --- | --- | --- |
-| A | A0 account/risk + A1 realtime quote/minute/MA + A2 auction/queue + B1 breadth/theme structure | May output probabilities, expected R, and position caps |
-| B | A0 + A1 + B1, but A2 incomplete | May output opening confirmation conditions; no chase-strength |
+| A | A0 account/risk + A1 realtime quote/minute/MA + A2 auction/queue + B1 breadth/theme structure | May output 09:28 early plan, probabilities, expected R, and position caps; still verify at 09:35 |
+| B | A0 + A1 + B1, but A2 incomplete | May output 09:30-09:35 absorption confirmation conditions; no 09:28 chase-strength |
 | C | A0 plus stale or partial market data | Defensive checklist only |
 | D | A0 missing | No position advice |
 
@@ -80,6 +80,21 @@ Include the scenario score table, final regime, confidence, and total position p
 
 For each holding, define exact events. Example: "09:35站回59.40", "10:00站稳VWAP", "收盘站上60.80". Include structural stop, 1R, target R, and do-not-trade condition.
 
+## 3A. 09:35承接确认表
+
+This section is mandatory when A2 is missing and still useful when A2 exists.
+
+| 标的 | 09:35确认事件 | 需要看到的证据 | 确认后权限 | 证伪条件 |
+| --- | --- | --- | --- | --- |
+
+Minimum evidence: target price versus open, target price versus VWAP, sector core names moving together, market regime not retreating, and stop distance still supporting positive expected R.
+
+After the 2026-05-28 three-month replay, role filtering is mandatory:
+
+1. Weak follower / weak relay names do not receive chase-strength permission. They may only be observed or tested with tiny size after repeated confirmation.
+2. Leader, core anchor, and trend/anchor names may enter the 09:35 confirmation queue, but only if price is above open, not below VWAP, sector core names confirm, and stop distance keeps expected R positive.
+3. If the report cannot identify sector role, default to observe instead of treating a high open as strength.
+
 ## 4. 板块与候选预测
 
 | 板块 | 龙头证据 | 中军证据 | 补涨证据 | 场景含义 | 可交易模式 | 概率结论 |
@@ -95,12 +110,13 @@ If leaders and core anchors are weaker than followers, follower strength is unre
 Types: open-executable, first-five-minute confirmation, low-buy only, reduce/exit, observe, cancel.
 
 Do not allow a buy/add plan unless expected R is positive, data permission allows it, and stop distance is defined.
+Use the regime risk budget, not the hard cap, as the default 1R: 强进攻日 1.5%, 轮动日 0.75%, 退潮日 0%, 冰点修复日 0.5%, 混沌日 0.25%. The 5% hard cap is not a normal trade budget.
 
 ## 6. 禁止动作
 
 List only today's relevant prohibitions, such as:
 
-1. Missing A2 data means no chase-strength.
+1. Missing A2 data means no 09:28 chase-strength.
 2. Do not add to any short-term holding after structural stop fires.
 3. Do not trade a follower if leader/core auction is weak.
 4. Do not trade solely from a concept label or good-news high open.

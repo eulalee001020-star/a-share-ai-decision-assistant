@@ -22,6 +22,9 @@ CONTROL_LABELS = {
     "no_intraday_trade": "禁止盘中高置信交易动作",
     "no_chase": "禁止追强",
     "opening_confirmation_only": "只给 09:30-09:35 确认条件",
+    "opening_absorption_required": "缺A2时必须等待开盘承接",
+    "market_regime_required": "交易动作必须先有市场状态权限",
+    "sector_resonance_required": "买入/加仓必须检查板块共振",
     "regime_confidence_cap_medium": "市场状态置信度不得高于中",
     "proxy_not_institution_intent": "资金流只能作为 vendor proxy",
     "preserve_conflict": "保留正反证据冲突",
@@ -41,6 +44,12 @@ CONTROL_LABELS = {
     "base_rate_required": "概率必须有 base rate 或标注待校准",
     "expected_r_required": "可执行计划必须计算期望 R",
     "priced_in_check": "消息面必须经过行情兑现校验",
+    "sector_scope_required": "用户板块必须拆子方向和角色",
+    "user_input_not_evidence": "用户关注不能作为买入证据",
+    "fresh_stock_packet_required": "用户个股必须先补实时数据包",
+    "holding_thesis_update_required": "持仓必须更新原始逻辑强弱",
+    "alternative_ev_compare_required": "新机会必须和持仓期望收益比较",
+    "no_trade_for_ineligible_market": "非沪深主板标的不得进入交易建议",
 }
 
 
@@ -285,6 +294,75 @@ CASES: list[dict[str, Any]] = [
         "plan": {"action": "observe", "missing_outcome_schema": True},
         "expected_controls": ["base_rate_required", "expected_r_required"],
     },
+    {
+        "id": "PL-007",
+        "category": "plan_quality",
+        "title": "用户给定板块只有概念标签",
+        "available_layers": ["A0", "A1", "B1", "C2"],
+        "plan": {"user_theme": True, "theme_only": True},
+        "expected_controls": [
+            "sector_scope_required",
+            "user_input_not_evidence",
+            "source_required",
+            "priced_in_check",
+        ],
+    },
+    {
+        "id": "PL-008",
+        "category": "plan_quality",
+        "title": "用户给定个股缺实时数据仍要求具体买点",
+        "available_layers": ["A0", "B1"],
+        "plan": {"user_stock": True, "action": "buy", "has_stop": True},
+        "expected_controls": ["fresh_stock_packet_required", "manual_checklist", "no_intraday_trade"],
+    },
+    {
+        "id": "PL-009",
+        "category": "plan_quality",
+        "title": "新票换仓未和当前持仓比较",
+        "available_layers": ["A0", "A1", "B1"],
+        "plan": {"switch_candidate": True},
+        "expected_controls": ["alternative_ev_compare_required"],
+    },
+    {
+        "id": "RK-007",
+        "category": "risk",
+        "title": "亏损持仓要求继续拿到回本",
+        "available_layers": ["A0", "A1", "B1"],
+        "plan": {"holding_review": True, "existing_loss": True, "action": "hold"},
+        "expected_controls": ["holding_thesis_update_required", "sunk_cost_recheck", "alternative_ev_compare_required"],
+    },
+    {
+        "id": "DV-007",
+        "category": "data_gate",
+        "title": "用户给定非沪深主板强势股",
+        "available_layers": ["A0", "A1", "B1"],
+        "plan": {"user_stock": True, "ineligible_market": True},
+        "expected_controls": ["no_trade_for_ineligible_market"],
+    },
+    {
+        "id": "DV-008",
+        "category": "data_gate",
+        "title": "缺A2但有A1/B1时要求开盘后确认",
+        "available_layers": ["A0", "A1", "B1"],
+        "automation": "auction",
+        "intent": "open_after_confirmation",
+        "expected_controls": ["no_chase", "opening_confirmation_only", "opening_absorption_required"],
+    },
+    {
+        "id": "RK-008",
+        "category": "risk",
+        "title": "买入计划跳过市场状态和板块共振",
+        "available_layers": ["A0", "A1", "B1"],
+        "plan": {
+            "action": "buy",
+            "has_stop": True,
+            "has_expected_r": True,
+            "has_base_rate": True,
+            "missing_regime": True,
+            "missing_sector_resonance": True,
+        },
+        "expected_controls": ["market_regime_required", "sector_resonance_required"],
+    },
 ]
 
 
@@ -317,7 +395,7 @@ def derive_controls(case: dict[str, Any]) -> set[str]:
     if layers and "A1" not in layers:
         controls.update({"manual_checklist", "no_intraday_trade"})
     if automation == "auction" and "A2" not in layers:
-        controls.update({"no_chase", "opening_confirmation_only"})
+        controls.update({"no_chase", "opening_confirmation_only", "opening_absorption_required"})
     if automation == "tail" and plan.get("missing_next_auction_check"):
         controls.update({"opening_confirmation_only", "human_confirm_required"})
     if automation == "tail" and "A1" not in layers:
@@ -333,6 +411,20 @@ def derive_controls(case: dict[str, Any]) -> set[str]:
         controls.update({"source_required", "priced_in_check"})
     if plan.get("single_stock") and plan.get("missing_sector_role"):
         controls.update({"manual_checklist", "regime_confidence_cap_medium"})
+    if plan.get("user_theme"):
+        controls.update({"sector_scope_required", "user_input_not_evidence"})
+        if "B1" not in layers:
+            controls.add("manual_checklist")
+    if plan.get("user_stock") and "A1" not in layers:
+        controls.update({"fresh_stock_packet_required", "manual_checklist", "no_intraday_trade"})
+    if plan.get("holding_review"):
+        controls.update({"holding_thesis_update_required", "alternative_ev_compare_required"})
+        if plan.get("existing_loss"):
+            controls.add("sunk_cost_recheck")
+    if plan.get("switch_candidate"):
+        controls.add("alternative_ev_compare_required")
+    if plan.get("ineligible_market"):
+        controls.add("no_trade_for_ineligible_market")
 
     if evidence.get("has_source") is False:
         controls.update({"no_source_no_claim", "source_required"})
@@ -357,6 +449,8 @@ def derive_controls(case: dict[str, Any]) -> set[str]:
         controls.add("base_rate_required")
     if plan.get("action") in {"buy", "add"} and plan.get("has_stop") and plan.get("has_expected_r"):
         controls.update({"expected_r_required", "base_rate_required"})
+    if plan.get("action") in {"buy", "add"}:
+        controls.update({"market_regime_required", "sector_resonance_required"})
     if plan.get("existing_loss") and plan.get("action") == "add":
         controls.add("sunk_cost_recheck")
     if plan.get("overnight") and plan.get("missing_next_auction_check"):

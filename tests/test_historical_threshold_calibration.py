@@ -55,7 +55,7 @@ class HistoricalThresholdCalibrationTests(unittest.TestCase):
                     "avg_abs_open_gap_pct": 1.0,
                     "avg_first_15m_range_pct": 2.0,
                     "gap_up_fade_rate": 0.2,
-                    "permission": "缺 A2：只允许 09:30-09:45 确认，禁止追强。",
+                    "permission": "缺 A2：只允许 09:35首确认/09:45二次确认，禁止09:28追强。",
                 }
             ],
             "tail_samples": [

@@ -9,7 +9,17 @@
   "data_health": {
     "grade": "A",
     "core_coverage": 0.88,
-    "permission": "Generate a full research run packet with explicit data gaps and output constraints."
+    "permission": "Generate a full research run packet with explicit data gaps and output constraints.",
+    "stable_data_readiness": {
+      "score": 95,
+      "max_score": 100,
+      "version": "2026-05-28-stable-data-permission"
+    },
+    "action_permission_ceiling": {
+      "code": "tail_full_plan",
+      "max_action": "tail_plan_with_next_open_validation",
+      "blocked_actions": ["guaranteed_next_day_claim", "overnight_no_stop_trade"]
+    }
   },
   "artifacts": [
     {

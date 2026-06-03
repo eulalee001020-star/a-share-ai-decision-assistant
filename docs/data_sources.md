@@ -2,6 +2,61 @@
 
 Fresh A-share screening depends on accessible data. Use the best available sources in this priority order.
 
+## Best Available Data Stack
+
+For the current product, "best data" means the most complete data that can be acquired repeatedly and audited. Do not use one-off screenshots or unstable webpage responses as hard evidence unless they are saved into `data/manual/` or `reports/`.
+
+| Layer | Best practical source | Use | Product rule |
+| --- | --- | --- | --- |
+| A0 account/risk | Broker screenshot, trade record, `config/portfolio.json` | Position, cash, cost, risk budget | Mandatory for sizing |
+| A1 realtime quote/minute | Local collector from Sina/Tencent; AKShare realtime/minute when stable; licensed minute source if available | Latest price, open, VWAP, 09:35 confirmation, 14:30 tail check | Mandatory for actionable intraday output |
+| Historical daily/minute | Tencent public daily bars for broad replay; AKShare/Eastmoney historical daily/minute; Tushare Pro historical minute if licensed | Backtest, threshold calibration, confirmation lift | Use public data for guardrails; use licensed minute data for 09:35 path validation |
+| A2 auction | Tushare auction permission, iFinD/Tonghuashun terminal/API, Tonghuashun screenshot/manual CSV | 09:15-09:25 amount, post-09:20 cancel, seal, queue, role ranking | Only this layer can justify 09:28 early permission |
+| B1 market structure | AKShare/Eastmoney limit-up/down pools, sector/concept rankings, market breadth | Market regime and losing-money effect | Missing B1 caps regime confidence |
+| Sector role | Eastmoney/同花顺 concept constituents, sector leaders, manual role file, relative-strength proxy | Leader/core/catch-up/follower classification | Weak followers are default blocked |
+| Message evidence | Exchange/company announcements, CNINFO, company IR, major securities news, manual notes | Catalyst, conflict, priced-in checks | Must keep source, timestamp, conflict |
+| Slow structure | Fund holdings, HK Stock Connect, margin, shareholder count, chip data | Crowding and structural correction | Weak correction only; not intraday hard evidence |
+
+Operational recommendation:
+
+1. For free/local use, run A1/B1 collection and public historical replay every day; this is enough to keep guardrails disciplined.
+2. For the best version of the application, add a licensed or terminal-export layer for historical 1-minute data and A2 auction data. Without it, do not claim 09:35 confirmation alpha or 09:28 auction alpha.
+3. Cache every fetched dataset by date, code, source, and retrieval time. Reproducibility matters more than having a larger but untraceable feed.
+4. If two sources conflict, keep both and lower confidence; do not silently choose the value that supports the trade.
+
+## Provider Integration Roadmap
+
+External discussions often mention QMT, PTrade, 掘金, 聚宽, Tushare, Sina, yfinance, and Fincep-style tools. Treat these as provider candidates, not conclusions. The local contract is in `docs/data_provider_integration_plan.md`:
+
+1. QMT/PTrade/掘金/券商量化终端 are production-candidate sources for A1/A2/B1 only after account permission, export fields, latency, and cache format are verified.
+2. 聚宽/Tushare are useful for historical replay, slow variables, and some specialty data; they do not automatically replace intraday A1 unless live fields are verified.
+3. yfinance is not an A-share intraday source for this system.
+4. Any new provider must first export auditable CSV/JSON into `data/vendor/` or `data/manual/`, then enter the same `data-health` gate.
+5. Community comments about funding thresholds or broker access are leads for verification, not source-of-truth system rules.
+
+For the board-capital migration view shown in external examples, use the B1 manual import:
+
+```bash
+python3 tools/trading_assistant.py sector-flow template --date YYYY-MM-DD
+python3 tools/trading_assistant.py sector-flow import-csv --date YYYY-MM-DD --input data/manual/sector_flow/YYYY-MM-DD.csv --source "QMT/PTrade/JoinQuant/manual"
+python3 tools/trading_assistant.py sector-flow summary --date YYYY-MM-DD
+```
+
+This can restore B1 sector-flow structure when public APIs fail, but it cannot restore A1 quote/minute/VWAP coverage.
+
+## Stable Data Weighting
+
+`config/decision_weights.json` is the system-level contract for data priority. The current architecture gives primary weight to data that can be collected repeatedly and audited:
+
+1. B1 market regime and losing-money effect.
+2. B1 sector resonance and stock role.
+3. A1+B1 09:35 opening absorption.
+4. A0+A1 risk-reward, stop distance, liquidity, and sizing.
+5. A1 K-line, moving averages, volume, and relative strength.
+6. C2 source-backed catalysts.
+
+Hard-to-get layers are modifiers, not main gates. A2 auction can advance a qualified plan from 09:35 to 09:28, but cannot skip 09:35 validation. Individual fund-flow, chips, holder structure, margin, and Level-2 queue data can only adjust confidence when present; their absence should not block the stable A0/A1/B1 workflow or be repeated as daily boilerplate.
+
 ## Stock Pool Discovery
 
 1. Exchange announcements and company公告 for verified catalysts.
@@ -16,6 +71,40 @@ For each theme, do not stop at a single concept label. Split into sub-themes:
 3. 商业航天：卫星制造、火箭、地面设备、卫星互联网、测控、材料与元器件.
 4. AI上游/电子布：AI服务器、PCB、覆铜板、玻纤布/电子布、树脂、铜箔、材料涨价.
 5. 算力电力：IDC、电力设备、变压器、配电、电源、液冷、储能、绿电.
+
+## User-Supplied Sector, Stock, And Holding Inputs
+
+When the user provides a sector, stock, or asks about holdings, treat the input as a target-selection hint, not as market evidence. The stable workflow is:
+
+1. Generate the combined run packet:
+
+```bash
+python3 tools/trading_assistant.py render user --date YYYY-MM-DD --themes 半导体 AI硬件 --codes 002156.SZ 603920.SH
+```
+
+2. Collect A1/B1 evidence for user-supplied stocks and the configured holdings/watchlist:
+
+```bash
+python3 tools/trading_assistant.py collect tail-data --date YYYY-MM-DD --time 1430 --codes 002156.SZ 603920.SH
+python3 tools/trading_assistant.py data-health --date YYYY-MM-DD --time 1430 --automation user
+```
+
+3. If a single stock needs deep research, run:
+
+```bash
+python3 tools/trading_assistant.py collect stock-data --code 002156.SZ --date YYYY-MM-DD --time 1430
+```
+
+Output permissions:
+
+| Input Type | Required Evidence | If Missing |
+| --- | --- | --- |
+| User sector | B1 breadth/theme structure, leader/core/catch-up comparison, catalyst source | Only direction map and manual verification list |
+| User stock | A1 quote/minute/MA, liquidity, sector role, catalyst/source, stop level | No high-confidence buy/add; observe or verify only |
+| Current holding | A0 cost/quantity/risk, A1 current structure, original thesis update, alternatives comparison | No add; hold/reduce/sell only by explicit trigger |
+| Opening chase | A2 auction data plus A1/B1 | No 09:28 chase-strength; wait for 09:30-09:35 confirmation |
+
+For all three input types, compare the conclusion with current portfolio risk. A new candidate should become a buy or switch candidate only when it is stronger than the relevant holding on expected value, sector role, liquidity, stop distance, and market-regime permission.
 
 ## Market Data Required
 
@@ -90,6 +179,25 @@ Tier 3 data is not stable enough as a mandatory intraday input in this repositor
 
 Tail reports must cite the generated CSV/JSON coverage line. If Tier 1 fields are missing for a stock, it cannot receive a high-confidence buy score. Missing Tier 3 data should not be repeated every day; mention it only when it blocks a claim about chips, holder structure, hidden liquidity, or true institutional intent.
 
+## Opening Permission Data Priority
+
+The stable product evidence for the open is not A2 alone. Use this order:
+
+1. Market regime and losing-money effect.
+2. Sector resonance: leader, core anchor, catch-up, follower, and breadth.
+3. 09:30-09:35 opening confirmation from public quote/minute data.
+4. Risk-reward: structural stop, 1R, target R, expected R, and position cap.
+5. A2 auction fields only for earlier 09:28 permission.
+
+The easiest high-value sample is 09:35 confirmation. Collect it with the same public collector:
+
+```bash
+python3 tools/trading_assistant.py collect tail-data --date YYYY-MM-DD --time 0935 --codes 当日核心票1 当日核心票2
+python3 tools/trading_assistant.py data-health --date YYYY-MM-DD --time 0935 --automation auction
+```
+
+The 09:35 packet should be judged by whether the stock is above its open, above or not materially below VWAP, supported by sector core names, and still has acceptable stop distance. This is a post-open confirmation layer, not a replacement for true A2.
+
 ## 09:28 Call-Auction Data Priority
 
 For 09:28 auction correction, use the local Tonghuashun desktop client first when available and permitted.
@@ -113,10 +221,10 @@ If Tonghuashun cannot be opened or read, state that explicitly. Do not infer auc
 
 ### 09:28 Data Permission Rules
 
-The 09:28 automation now treats call-auction data as a core input, not an optional enhancement. Use the data-grade system in `docs/prediction_automation_system.md`.
+The 09:28 automation treats call-auction data as an early-permission input. Use the data-grade system in `docs/prediction_automation_system.md` and the permission model in `docs/opening_permission_model.md`.
 
 1. If A2 auction data is available from Tonghuashun, screenshots, or a manual export, the report may classify auction strength and assign chase/low-buy permissions.
-2. If A2 data is missing but A1 realtime quote/minute data is available, the report may only output 09:30-09:35 confirmation conditions. It must not say a stock is "竞价超预期".
+2. If A2 data is missing but A1 realtime quote/minute and B1 market structure are available, the report may only output 09:30-09:35 confirmation conditions. It must not say a stock is "竞价超预期".
 3. If A1 is also missing, the report is a defensive checklist only.
 4. Missing auction fields should be specific:竞价成交额、09:20后撤单、封单额、队列、龙头/中军/跟风排序. Do not replace them with generic boilerplate.
 
@@ -126,28 +234,76 @@ Recommended manual auction export path when screenshots or Tonghuashun values ar
 data/manual/auction/{YYYY-MM-DD}.json
 ```
 
+Use the local sample ledger to check whether A2 is actually usable:
+
+```bash
+python3 tools/trading_assistant.py auction-template --date YYYY-MM-DD
+python3 tools/trading_assistant.py auction-csv-template --date YYYY-MM-DD --codes 当日核心票1 当日核心票2
+python3 tools/trading_assistant.py auction-import-csv --date YYYY-MM-DD --input data/manual/auction/YYYY-MM-DD.csv
+python3 tools/trading_assistant.py auction-samples --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+python3 tools/trading_assistant.py auction-calibration --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+```
+
+The critical fields for opening permission are `auction_price`, `auction_amount_cny`, `post_0920_cancel_signal`, and `role_signal`. If these are missing, the report must keep confirmation-only permission even when a screenshot or file exists.
+
+CSV is the fastest practical path when Tonghuashun export is available or when screenshots are manually transcribed into a spreadsheet. Minimum schema:
+
+```csv
+股票代码,竞价价,竞价成交额,09:20后撤单,板块角色
+002156,10.50,1.2亿,良性,中军
+```
+
+The importer also accepts English field names such as `code`, `auction_price`, `auction_amount_cny`, `post_0920_cancel_signal`, and `role_signal`. Chinese units like `万` and `亿` are converted to CNY numbers.
+
+Initial sampling discipline:
+
+1. First 20 trading days: holdings, watchlist, and same-day sector core names only.
+2. 20-60 complete rows: compare A2-confirmed versus no-A2 predictions using `auction-calibration`.
+3. Only after the comparison shows lower false-permission, lower 09:35 invalidation, and smaller expected-R error should 09:28 opening permissions be reconsidered.
+
+## Message Evidence Layer
+
+Announcements, news, industry-chain notes, and user-supplied articles should enter a structured evidence file before they affect stock or sector conclusions:
+
+```bash
+python3 tools/trading_assistant.py message-evidence template --date YYYY-MM-DD --codes 002156.SZ --themes 半导体
+python3 tools/trading_assistant.py message-evidence summary --date YYYY-MM-DD
+```
+
+Default path:
+
+```text
+data/manual/messages/{YYYY-MM-DD}.json
+```
+
+Each evidence item must preserve source type, source name, title, publish time, URL/path, stance, freshness, rumor flag, conflict references, and confidence. Missing-source, stale, rumor, and conflicting items lower confidence and cannot become high-confidence catalysts by themselves.
+
 Suggested structure:
 
 ```json
 {
-  "generated_at": "2026-05-15 09:27:30",
-  "source": "Tonghuashun screenshot/manual export",
-  "market": {
-    "index_signal": "弱/中/强",
-    "limit_up_count": 0,
-    "limit_down_count": 0,
-    "highest_board": 0
+  "date": "2026-05-15",
+  "scope": {
+    "codes": ["002156.SZ"],
+    "themes": ["半导体"]
   },
-  "stocks": [
+  "evidence": [
     {
+      "id": "msg-001",
+      "source_type": "exchange_announcement/company_disclosure/news/industry_chain/ir/transcript/manual_note",
+      "source_name": "交易所公告",
+      "title": "公告标题",
+      "published_at": "2026-05-15 08:45",
+      "url_or_path": "https://example.com/announcement",
       "code": "002156.SZ",
-      "name": "通富微电",
-      "auction_price": 0,
-      "auction_change_pct": 0,
-      "auction_amount_cny": 0,
-      "post_0920_cancel_signal": "unknown/benign/bad",
-      "seal_amount_cny": 0,
-      "role_signal": "leader/core/catch_up/follower/invalid"
+      "theme": "半导体",
+      "summary": "一句话事实摘要，不写推断。",
+      "stance": "positive/negative/neutral/conflicting",
+      "freshness": "fresh/stale/unknown",
+      "is_rumor": false,
+      "conflicts_with": [],
+      "used_for": "catalyst/thesis_update/risk/priced_in_check/background",
+      "confidence": "high/medium/low"
     }
   ]
 }

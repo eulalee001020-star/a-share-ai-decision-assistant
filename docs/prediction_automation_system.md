@@ -1,8 +1,8 @@
 # 预测型自动化系统设计
 
-Last updated: 2026-05-16 Asia/Shanghai
+Last updated: 2026-05-28 Asia/Shanghai
 
-本文定义 09:28 集合竞价自动化和 14:30 尾盘自动化的新框架。目标不是制造确定性预测，而是把每个交易判断变成可审计、可复盘、可校准的概率下注。
+本文定义 09:28 集合竞价自动化、13:10 下午盘计划自动化和 14:30 尾盘资金流自动化的新框架。目标不是制造确定性预测，而是把每个交易判断变成可审计、可复盘、可校准的概率下注。
 
 ## 1. 核心原则
 
@@ -18,12 +18,38 @@ Last updated: 2026-05-16 Asia/Shanghai
 | --- | --- | --- | --- |
 | A0 | 当前持仓、可用数量、成本、账户总资产、止损线、风险预算 | 必须有 | 不能给仓位建议，只能给观察清单 |
 | A1 | 个股实时价、开高低、成交额、VWAP、量比、5/10/20/60 日线、涨跌幅 | 必须有 | 不能给高置信个股计划 |
-| A2 | 09:15-09:25 竞价成交、竞价额、09:20 后撤单、封单额、盘口队列、龙头/中军/跟风竞价排序 | 09:28 核心输入 | 禁止追强、禁止说“竞价超预期”，只能给 09:30-09:35 确认条件 |
+| A2 | 09:15-09:25 竞价成交、竞价额、09:20 后撤单、封单额、盘口队列、龙头/中军/跟风竞价排序 | 09:28 提前放权输入 | 禁止 09:28 追强、禁止说“竞价超预期”，只能给 09:30-09:35 确认条件 |
 | B1 | 板块龙头/中军/补涨同步，涨停、跌停、炸板、连板高度，强股反馈 | 场景判断核心输入 | 市场状态置信度不得高于中 |
 | B2 | 筹码峰、成本分布、压力/支撑区 | 概率修正输入 | 可以交易，但突破/回踩概率必须降置信 |
 | B3 | 大单、资金流、龙虎榜、融资、港股通 | 资金行为代理 | 不可单独定性为吸筹/出货 |
 | C1 | 股东户数、基金持仓、机构调研 | 慢变量和拥挤度 | 只影响中线质量，不触发日内买卖 |
 | C2 | 公告、产业链新闻、政策、价格/订单/产能变化 | 催化与预期修正 | 没有来源不能作为高置信买点 |
+
+## 2A. 开盘权限模型
+
+09:28 不是唯一决策点。系统把开盘权限拆成主证据层和提前放权层，具体以 `docs/opening_permission_model.md` 为准。
+
+| 证据层 | 组成 | 作用 |
+| --- | --- | --- |
+| 主证据层 | 市场状态、亏钱效应、板块共振、个股 09:30-09:35 承接、成交额/换手/量比、止损距离和 expected R | 决定能不能交易、交易什么、仓位多大 |
+| 提前放权层 | 真实 A2 竞价额、09:20 后撤单、封单、队列和竞价角色 | 只决定能不能把动作提前到 09:28 |
+
+缺 A2 时，不是完全不能研究，也不是永远不能交易；它只禁止 09:28 追强和“竞价超预期”结论。若 A1+B1 可用，候选必须降级为 09:30-09:35 承接确认：站上开盘价、强于 VWAP、板块核心票同步、止损距离仍合格，才允许进入后续计划。
+
+## 2B. 稳定数据权重
+
+稳定、可重复、可审计的数据优先于难以连续获得的数据。权重配置固化在 `config/decision_weights.json`，并由 `data-health` 输出 `stable_data_readiness` 和 `action_permission_ceiling`，供后续工作流直接读取。
+
+| 主证据组件 | 权重 | 主要数据层 | 权限含义 |
+| --- | ---: | --- | --- |
+| 市场状态和亏钱效应 | 25 | B1 | 决定当天能否承担新增风险 |
+| 板块共振和角色 | 20 | B1 | 决定只做核心/中军还是观察 |
+| 09:35 开盘承接 | 20 | A1+B1 | 缺 A2 时的主要执行确认 |
+| 风险收益比和流动性 | 20 | A0+A1 | 决定仓位上限和是否值得做 |
+| K 线和相对强弱 | 10 | A1 | 定义阶段、压力、支撑和失效条件 |
+| 有来源的催化 | 5 | C2 | 修正逻辑强弱，不单独触发日内买入 |
+
+可选修正不进入主证据硬门槛：真实 A2 竞价最多只提前放权，资金流只能作为 vendor-classified proxy，筹码/股东/融资/港股通只能修正结构和拥挤度。任何买入或加仓仍必须经过市场状态、板块共振、09:35/VWAP 承接、结构止损和 expected R。
 
 ## 3. 场景评分
 
@@ -79,7 +105,7 @@ Last updated: 2026-05-16 Asia/Shanghai
 | 失败概率 | 跌破结构止损、跌回 VWAP、开盘承接失败 | 决定止损和仓位 |
 | 噪音概率 | 震荡、不触发买卖、机会成本增加 | 修正期望 R |
 
-## 6. 两个自动化的分工
+## 6. 三个日内自动化的分工
 
 ### 09:28 竞价预测
 
@@ -97,28 +123,61 @@ Last updated: 2026-05-16 Asia/Shanghai
 4. 板块龙头、中军、补涨的竞价强弱和同步性。
 5. 期望 R、仓位上限、取消条件。
 
-### 14:30 尾盘预测
+### 13:10 下午盘午盘信息与交易计划
+
+回答三个问题：
+
+1. 上午盘判断哪里被强化或证伪？
+2. 下午盘持仓怎么处理，哪些观察池需要 14:30 再验证？
+3. 哪些尾盘/隔夜想法必须先取消？
+
+必须输出：
+
+1. 数据等级、11:30 与 13:05 承接对比。
+2. 上午盘预测复盘和市场状态更新。
+3. 持仓处理、观察池排序、14:30 必看条件。
+4. 尾盘/隔夜候选、取消清单、1R、结构止损、目标R和不交易条件。
+5. 次日 09:35 验证条件。
+
+### 14:30 尾盘资金流与观察机会
 
 回答三个问题：
 
 1. 09:28 预测哪里对、哪里错？
-2. 今天强度有没有隔夜价值？
-3. 明天 09:28 要验证什么？
+2. 今天资金最终更可能流向哪些板块？
+3. 哪些核心/中军有次日 09:35 可观察买入机会？
 
 必须输出：
 
-1. 今日预测复盘。
-2. 尾盘场景评分。
-3. 观察股隔夜预测：收盘站强概率、次日竞价承接概率、次日兑现概率。
-4. 期望 R 和隔夜风险。
-5. 次日竞价验证清单。
+1. 14:30 数据等级、动作权限和缺失限制。
+2. 13:05 到 14:30 的涨停、炸板、跌停、宽基和板块资金流变化。
+3. 资金最可能流向的板块排序，以及龙头/中军/补涨/跟风分层。
+4. 可观察买入机会、持仓影响、期望 R、隔夜风险和不交易条件。
+5. 次日 09:35 验证清单。
+
+### 用户给定板块/个股/持仓综合分析
+
+This is an on-demand workflow, not a scheduled automation. It answers three user-driven questions in one data-permission chain:
+
+1. 用户给出的板块是否是真主线、轮动方向、退潮方向，还是仅是概念标签。
+2. 用户给出的个股在证据栈、板块角色、催化和风险收益上是否有交易资格。
+3. 当前持仓的原始逻辑是否 strengthened, weakened, unchanged, or invalidated, and whether new candidates are better than existing exposure.
+
+Required safeguards:
+
+1. User attention is not evidence. It only defines the target list.
+2. Missing A1/B1 downgrades the output to observation and manual verification.
+3. Missing A2 blocks only auction/chase conclusions, not post-open research.
+4. Holding advice must include thesis update, positive/negative evidence, priced-in evidence, reduce/sell triggers, and add conditions.
+5. Switch advice requires comparing expected value, sector role, liquidity, stop distance, and concentration risk.
 
 ## 7. 输出权限
 
 | 数据状态 | 允许输出 |
 | --- | --- |
-| A0 + A1 + A2 + B1 可用 | 可以输出场景概率、个股概率、下注资格和仓位 |
-| A0 + A1 + B1 可用，但 A2 缺失 | 只能输出开盘确认条件，禁止追强 |
+| A0 + A1 + A2 + B1 可用 | 可以输出09:28提前计划、场景概率、个股概率、下注资格和仓位；仍需09:35承接验证 |
+| A0 + A1 + B1 可用，但 A2 缺失 | 只能输出09:30-09:35承接确认条件，确认前禁止追强 |
+| A0 + A1 + B1 可用，用户给定板块/个股/持仓 | 可以输出综合分析、持仓建议、期望R和仓位上限；开盘追强仍需A2 |
 | 只有 A0 和昨日数据 | 只能输出防守清单和手动核验表 |
 | A0 缺失 | 不能给仓位，不能给买卖动作 |
 
@@ -159,6 +218,20 @@ reports/outcomes/{YYYY-MM-DD}-outcomes.jsonl
 
 收盘或次日必须记录 actual、result_r、error_type 和修正结论。没有复盘的预测不允许进入后续胜率统计。
 
+可先用 prediction 自动生成 outcome 模板，避免复盘漏行：
+
+```bash
+python3 tools/trading_assistant.py prediction outcome-template --date YYYY-MM-DD --automation auction
+```
+
+09:28 A2 校准还需要额外标记 `false_permission` 和 `invalidated_at_0935`。前者用于衡量数据权限是否误放行，后者用于衡量竞价判断到 09:35 是否被开盘承接证伪。
+
+20-60 个真实 A2 样本后，使用：
+
+```bash
+python3 tools/trading_assistant.py auction-calibration --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+```
+
 校准 replay 使用：
 
 ```bash
@@ -177,3 +250,10 @@ reports/behavior/{YYYY-MM-DD}-events.jsonl
 ```
 
 最小字段包括 `plan_id`、`attempted_action`、`violated_rules`、`guardrail_action`、`outside_plan`、`stop_present`、`executed` 和 `user_override`。这些字段用于证明系统是否减少计划外交易、无止损交易和绕过风控，而不是用于声明收益。
+
+行为日志模板和周度复盘入口：
+
+```bash
+python3 tools/trading_assistant.py prediction behavior-template --date YYYY-MM-DD --automation auction
+python3 tools/trading_assistant.py review weekly --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+```

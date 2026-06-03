@@ -17,7 +17,7 @@ class PortfolioValidationTests(unittest.TestCase):
     def test_public_guardrail_cases_all_pass(self):
         results = portfolio_validation.evaluate_all()
         summary = portfolio_validation.aggregate(results)
-        self.assertEqual(30, summary["case_count"])
+        self.assertEqual(37, summary["case_count"])
         self.assertEqual(summary["case_count"], summary["passed_count"])
         self.assertEqual(1.0, summary["score_rate"])
 
@@ -34,6 +34,33 @@ class PortfolioValidationTests(unittest.TestCase):
         self.assertTrue(result.passed)
         self.assertIn("rumor_not_fact", result.derived_controls)
         self.assertIn("no_source_no_claim", result.derived_controls)
+
+    def test_user_theme_case_requires_scope_and_no_evidence_shortcut(self):
+        case = next(item for item in portfolio_validation.CASES if item["id"] == "PL-007")
+        result = portfolio_validation.evaluate_case(case)
+        self.assertTrue(result.passed)
+        self.assertIn("sector_scope_required", result.derived_controls)
+        self.assertIn("user_input_not_evidence", result.derived_controls)
+
+    def test_holding_review_requires_thesis_update(self):
+        case = next(item for item in portfolio_validation.CASES if item["id"] == "RK-007")
+        result = portfolio_validation.evaluate_case(case)
+        self.assertTrue(result.passed)
+        self.assertIn("holding_thesis_update_required", result.derived_controls)
+        self.assertIn("sunk_cost_recheck", result.derived_controls)
+
+    def test_missing_a2_after_open_requires_absorption_confirmation(self):
+        case = next(item for item in portfolio_validation.CASES if item["id"] == "DV-008")
+        result = portfolio_validation.evaluate_case(case)
+        self.assertTrue(result.passed)
+        self.assertIn("opening_absorption_required", result.derived_controls)
+
+    def test_buy_plan_requires_market_and_sector_confirmation(self):
+        case = next(item for item in portfolio_validation.CASES if item["id"] == "RK-008")
+        result = portfolio_validation.evaluate_case(case)
+        self.assertTrue(result.passed)
+        self.assertIn("market_regime_required", result.derived_controls)
+        self.assertIn("sector_resonance_required", result.derived_controls)
 
 
 if __name__ == "__main__":
