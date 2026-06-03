@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.playwright-cli/
 data/manual/
 data/vendor/
 config/portfolio.json

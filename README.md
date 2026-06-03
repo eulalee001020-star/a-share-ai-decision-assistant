@@ -1,47 +1,40 @@
 # A-Share AI Research & Trading Decision Assistant
 
-一个面向 A 股短线/波段交易决策的 AI Native 产品案例。系统把“看新闻、看盘口、看板块、看仓位、写交易计划”收敛成可审计的 Agent 工作流：先做数据权限判断，再做市场状态分类、个股证据栈、概率/期望 R 计算和风控约束。
-
-这个仓库展示的不是荐股模型，而是一套从需求定义、MVP、Agent 工作流、数据权限、风控规则、评测用例到复盘校准的完整产品闭环。当前版本是本地可运行的公开作品集，不接入券商下单接口；它重点证明如何把高风险、高时效场景中的 AI 输出约束在可解释、可降级、可验证的范围内。
+一个面向高风险决策场景的 AI Native Agent MVP。项目以 A 股盘前/盘中交易辅助为场景，把实时行情、板块结构、消息证据、持仓风险和用户意图收敛成可审计的工作流：先判断数据权限，再组织事实和推理，最后输出带触发、止损、仓位、失效条件和复盘字段的行动计划。
 
 > 本项目只做研究、计划和风险提示，不自动下单，不承诺收益，不构成投资建议。
 
-## 项目介绍
+![A 股投资辅助 Agent 工作台截图](docs/assets/demo-workbench.png)
 
-交易辅助是一个典型的高噪声 AI 应用场景：实时数据、新闻催化、用户持仓、风险预算和情绪冲动会同时影响决策。普通问答模型容易把缺失数据补成确定判断，也容易把“看好”直接推成买入动作。
+## For Recruiters
 
-本项目的产品方案是把 Agent 放进一个可测试的 AI 应用 harness：数据健康门决定能输出什么，运行包控制上下文，Prompt 工作流组织事实和推理，风控引擎计算仓位边界，prediction/outcome/behavior 日志用于复盘校准。AI 负责证据组织和冲突分析，规则层负责权限、止损、仓位和合规边界，用户保留最终确认权。
+| 30 秒问题 | 直接答案 |
+| --- | --- |
+| What it is | 一个高风险决策支持 Agent MVP，用交易辅助场景验证 AI 如何在数据不完整、风险高、时效强的业务中稳定输出。 |
+| What I built | 数据健康门、运行包构建器、Prompt 工作流、风控引擎、prediction/outcome/behavior 日志、37 条 guardrail 评测集和静态 Demo。 |
+| What it proves | AI 产品定义、Agent 架构、RAG/数据边界、模型不确定性控制、评测体系、MVP 工程落地和 ToB/SaaS 交付意识。 |
+| What it does not claim | 不自动交易，不证明投资收益，不包含真实账户/持仓/截图数据，不把历史 replay 包装成长期收益能力。 |
 
-## 能力映射
+## My Role / Ownership
 
-| 岗位关注点 | 本项目对应能力 | 证据入口 |
-| --- | --- | --- |
-| AI Native 产品定义 | 从真实交易决策痛点出发，把模型能力转成可落地的工作流和风险约束 | `docs/product_overview.md`、`docs/portfolio.md` |
-| Agent 与 RAG 理解 | 拆分数据层、运行包、Prompt 契约、消息证据层、复盘日志和降级策略 | `docs/agent_architecture.md`、`docs/workflow_prompts_io.md` |
-| 技术边界沟通 | 明确 AI、规则系统、数据源和人工确认各自负责什么，不把模型包装成自动交易系统 | `docs/data_sources.md`、`docs/privacy_and_compliance.md` |
-| MVP 与工程落地 | 提供 Python CLI、样例配置、静态 Demo、测试集和可复现运行命令 | `tools/trading_assistant.py`、`docs/demo/index.html`、`tests/` |
-| 评测与迭代 | 用 guardrail 用例、历史权限回测、概率校准和行为风险日志衡量系统质量 | `docs/validation_report.md`、`docs/calibration_and_risk_proof_plan.md` |
-| ToB/SaaS 交付意识 | 保留隐私隔离、数据接入路线、运行手册、权限模型和外部 provider 接入合同 | `docs/data_provider_integration_plan.md`、`docs/runbook.md` |
+这是一个个人主导的 AI 产品与工程作品。核心工作包括：
 
-## 项目入口
+1. 产品定义：将“预测涨跌”重构为“提升决策质量、权限控制和风险纪律”的 Agent 产品问题。
+2. 架构设计：拆分数据接入、数据健康门、运行包、Prompt 契约、风控引擎、日志和复盘校准。
+3. 规则设计：定义 A0/A1/A2/B1 数据分层、缺数据降级、09:35 承接确认、1R 风控和反沉没成本机制。
+4. 工程实现：实现本地 CLI、样例配置、运行包生成、数据健康检查、历史权限回测和验证脚本。
+5. 评测与文档：设计 37 条 guardrail 用例、失败案例、验证报告、产品说明、架构说明和可互动 Demo。
 
-- 作品集总览：[AI Portfolio Overview](docs/ai_portfolio_submission.md)
-- 产品案例：[Product Case Study](docs/portfolio.md)
-- Agent 架构：[Investment Decision-Support Agent Architecture](docs/agent_architecture.md)
-- 互动 Demo：[投资辅助 Agent 工作台 Demo](docs/demo/index.html)
-- 工作流说明：[Runbook](docs/runbook.md)
-- Workflow / Prompt / 输入输出展示：[Workflow, Prompts, Inputs And Outputs](docs/workflow_prompts_io.md)
-- 数据与证据边界：[Data Source Requirements](docs/data_sources.md)；外部数据源接入路线：[Data Provider Integration Plan](docs/data_provider_integration_plan.md)
-- 开盘权限模型：[Opening Permission Model](docs/opening_permission_model.md)
-- 预测与评估体系：[Prediction Automation System](docs/prediction_automation_system.md)
-- 评测集与失败案例：[Evaluation Cases And Iteration Notes](docs/evaluation_cases.md)
-- 公开验证报告：[Public Validation Report](docs/validation_report.md)
-- 历史阈值校准：[Historical Threshold Calibration](docs/historical_threshold_calibration.md)
-- 历史权限回测：[Historical Policy Backtest](docs/historical_policy_backtest.md)
-- 过去三个月可靠性回测：[3-Month Reliability Backtest](docs/reliability_backtest_3m.md)
-- 校准与风险证明方案：[Calibration And Risk Proof Plan](docs/calibration_and_risk_proof_plan.md)
-- 产品决策记录：[Product Decision Record](docs/product_decision_record.md)
-- Prompt 样例：[09:28 竞价](prompts/auction_check.md)、[14:30 尾盘](prompts/tail_check.md)、[主题筛选](prompts/theme_screening.md)、[单股深研](prompts/single_stock_research.md)、[用户综合分析](prompts/user_request_analysis.md)
+开发过程中使用 AI 工具加速代码草稿、文档整理和测试迭代；产品边界、架构取舍、风控规则、验证标准和公开内容由个人审阅和定稿。
+
+## Quick Links
+
+- [AI Portfolio Overview](docs/ai_portfolio_submission.md): 作品集总览
+- [Product Case Study](docs/portfolio.md): 产品案例与取舍
+- [Interactive Demo](docs/demo/index.html): Agent 工作台 Demo
+- [Agent Architecture](docs/agent_architecture.md): 架构与模块边界
+- [Validation Report](docs/validation_report.md): 37 条 guardrail 与回测证据
+- [Workflow / Prompts / IO](docs/workflow_prompts_io.md): 工作流、Prompt 和输入输出样例
 
 ## 真实市场需求
 
@@ -82,27 +75,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 python3 tools/trading_assistant.py validate
-python3 tools/trading_assistant.py render auction --date 2026-05-22 --stdout
 python3 tools/trading_assistant.py render user --date 2026-05-22 --themes 半导体 AI硬件 --codes 002156.SZ 603920.SH --stdout
-python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 0928 --automation auction
-python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 0928 --automation auction --json
-python3 tools/trading_assistant.py collect tail-data --date 2026-05-22 --time 0935 --codes 603920.SH
-python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 0935 --automation auction
-python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 1430 --automation user
-python3 tools/trading_assistant.py brief --date 2026-05-22 --time 0928 --automation auction
-python3 tools/trading_assistant.py prediction template --date 2026-05-22 --automation auction
-python3 tools/trading_assistant.py prediction outcome-template --date 2026-05-22 --automation auction
-python3 tools/trading_assistant.py prediction behavior-template --date 2026-05-22 --automation auction
-python3 tools/trading_assistant.py auction-csv-template --date 2026-05-22 --codes 603920.SH
-python3 tools/trading_assistant.py auction-import-csv --date 2026-05-22 --input data/manual/auction/2026-05-22.csv
-python3 tools/trading_assistant.py auction-samples --start-date 2026-05-22 --end-date 2026-05-22
-python3 tools/trading_assistant.py auction-calibration --start-date 2026-05-22 --end-date 2026-06-19
-python3 tools/trading_assistant.py review weekly --start-date 2026-05-22 --end-date 2026-05-22
 python3 tools/portfolio_validation.py --format markdown
-python3 tools/historical_threshold_calibration.py --start-date 2026-04-27 --end-date 2026-05-27
-python3 tools/historical_policy_backtest.py --start-date 2024-01-01 --end-date 2026-05-27
-python3 tools/historical_policy_backtest.py --start-date 2026-02-28 --end-date 2026-05-27 --output docs/historical_policy_backtest_3m.md --json-output reports/backtests/historical_policy_backtest_3m.json
-python3 tools/prediction_replay_evaluation.py --predictions reports/predictions/YYYY-MM-DD-predictions.jsonl --outcomes reports/outcomes/YYYY-MM-DD-outcomes.jsonl
+python3 -m unittest discover -s tests
 ```
 
 如果没有本地私有配置，工具会自动读取 `config/portfolio.example.json`。真实使用时复制一份私有配置：
@@ -112,6 +87,28 @@ cp config/portfolio.example.json config/portfolio.json
 ```
 
 `config/portfolio.json`、`docs/trading_assistant_state.md`、`data/manual/` 和 `reports/` 默认被 Git 忽略，避免公开账户、持仓和历史报告。
+
+<details>
+<summary>More CLI Workflows</summary>
+
+```bash
+python3 tools/trading_assistant.py render auction --date 2026-05-22 --stdout
+python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 0928 --automation auction --json
+python3 tools/trading_assistant.py collect tail-data --date 2026-05-22 --time 0935 --codes 603920.SH
+python3 tools/trading_assistant.py data-health --date 2026-05-22 --time 0935 --automation auction
+python3 tools/trading_assistant.py brief --date 2026-05-22 --time 0928 --automation auction
+python3 tools/trading_assistant.py prediction template --date 2026-05-22 --automation auction
+python3 tools/trading_assistant.py prediction outcome-template --date 2026-05-22 --automation auction
+python3 tools/trading_assistant.py prediction behavior-template --date 2026-05-22 --automation auction
+python3 tools/trading_assistant.py auction-csv-template --date 2026-05-22 --codes 603920.SH
+python3 tools/trading_assistant.py auction-import-csv --date 2026-05-22 --input data/manual/auction/2026-05-22.csv
+python3 tools/trading_assistant.py review weekly --start-date 2026-05-22 --end-date 2026-05-22
+python3 tools/historical_threshold_calibration.py --start-date 2026-04-27 --end-date 2026-05-27
+python3 tools/historical_policy_backtest.py --start-date 2024-01-01 --end-date 2026-05-27
+python3 tools/prediction_replay_evaluation.py --predictions reports/predictions/YYYY-MM-DD-predictions.jsonl --outcomes reports/outcomes/YYYY-MM-DD-outcomes.jsonl
+```
+
+</details>
 
 ## 工作流
 

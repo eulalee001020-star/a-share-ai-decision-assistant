@@ -10,7 +10,7 @@ This automation is separate from the 13:10 afternoon check. The 13:10 workflow p
 2. Output path: `reports/{YYYY-MM-DD}-1430-market-flow-opportunity-scan.md`.
 3. Prediction log path when predictions are written: `reports/predictions/{YYYY-MM-DD}-1430-market-flow-predictions.jsonl`.
 4. Read, in order:
-   - `AGENTS.md`
+   - `README.md`
    - `config/portfolio.json`
    - `docs/trading_assistant_state.md`
    - `docs/trading_system_upgrade.md`

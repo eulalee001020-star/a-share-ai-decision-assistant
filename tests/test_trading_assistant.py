@@ -166,6 +166,7 @@ class TradingAssistantTests(unittest.TestCase):
         self.assertIn("不符合沪深主板-only", packet)
         self.assertIn("边界解决机制", packet)
         self.assertIn("User Request Analysis Prompt", packet)
+        self.assertNotIn("AGENTS.md", packet)
 
     def test_render_market_flow_packet_contains_1430_sections(self):
         packet = trading_assistant.render_run_packet(ROOT, "market-flow", "2026-06-02")

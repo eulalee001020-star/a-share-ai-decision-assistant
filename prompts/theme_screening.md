@@ -4,7 +4,7 @@ Use this prompt when the user wants to anchor targets under preferred A-share th
 
 Run context:
 
-1. Load `AGENTS.md` and `config/portfolio.json`.
+1. Load `README.md`, `config/portfolio.example.json`, `docs/data_sources.md`, and `docs/prediction_automation_system.md`. For private local runs, also load `config/portfolio.json` when it exists.
 2. Load `docs/data_sources.md` as the data-field checklist.
 3. Load `docs/trading_system_upgrade.md` and apply `config.portfolio.risk_engine`.
 4. Use `stock_selection_preferences`; treat `preferred_themes` only as explicit current user input if non-empty.

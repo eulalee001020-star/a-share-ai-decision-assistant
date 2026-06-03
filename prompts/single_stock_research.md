@@ -165,7 +165,7 @@ Evidence must include price-volume, intraday behavior, order book when available
 
 ## 8. 所处阶段判断
 
-Use the stage library in `AGENTS.md`. Choose the closest 1-2 stages and explain why.
+Use the stage library in `docs/trading_system_upgrade.md`. Choose the closest 1-2 stages and explain why.
 
 ## 9. 三层共振与贝叶斯更新
 

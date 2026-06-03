@@ -64,17 +64,28 @@ PROMPTS = {
 
 CORE_CONTEXT_FILES = [
     "README.md",
-    "AGENTS.md",
     "config/decision_weights.json",
-    "config/portfolio.json",
     "config/portfolio.example.json",
-    "docs/trading_assistant_state.md",
     "docs/trading_assistant_state.example.md",
     "docs/trading_system_upgrade.md",
     "docs/data_sources.md",
     "docs/opening_permission_model.md",
     "docs/prediction_automation_system.md",
 ]
+
+OPTIONAL_LOCAL_CONTEXT_FILES = [
+    "config/portfolio.json",
+    "docs/trading_assistant_state.md",
+]
+
+
+def context_files_for(root: Path) -> list[str]:
+    files = list(CORE_CONTEXT_FILES)
+    for item in OPTIONAL_LOCAL_CONTEXT_FILES:
+        if (root / item).exists():
+            files.append(item)
+    return files
+
 
 DEFAULT_DECISION_WEIGHTS: dict[str, Any] = {
     "version": "2026-05-28-stable-data-permission",
@@ -919,7 +930,7 @@ def render_run_packet(
         "",
         "## 1. 必读上下文",
     ]
-    lines.extend(f"- `{item}`" for item in CORE_CONTEXT_FILES)
+    lines.extend(f"- `{item}`" for item in context_files_for(root))
     lines.extend(
         [
             "",

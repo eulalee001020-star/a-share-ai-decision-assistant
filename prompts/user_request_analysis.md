@@ -6,7 +6,7 @@ This workflow combines theme screening, single-stock research, and holding manag
 
 ## Run Context
 
-1. Load `AGENTS.md`, `config/portfolio.json`, `docs/trading_assistant_state.md`, `docs/data_sources.md`, and `docs/prediction_automation_system.md`.
+1. Load `README.md`, `config/portfolio.example.json`, `docs/trading_assistant_state.example.md`, `docs/data_sources.md`, and `docs/prediction_automation_system.md`. For private local runs, also load `config/portfolio.json` and `docs/trading_assistant_state.md` when they exist.
 2. Read the generated run packet section `用户输入分析对象`.
 3. For user-provided codes, run or cite:
 
