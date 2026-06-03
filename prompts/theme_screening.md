@@ -6,7 +6,7 @@ Run context:
 
 1. Load `README.md`, `config/portfolio.example.json`, `docs/data_sources.md`, and `docs/prediction_automation_system.md`. For private local runs, also load `config/portfolio.json` when it exists.
 2. Load `docs/data_sources.md` as the data-field checklist.
-3. Load `docs/trading_system_upgrade.md` and apply `config.portfolio.risk_engine`.
+3. Load `docs/trading_system_upgrade.md` and apply `config.portfolio.risk_engine` from the public example config or the private local config when available.
 4. Use `stock_selection_preferences`; treat `preferred_themes` only as explicit current user input if non-empty.
 5. Fresh market data is mandatory for final ranking. If market data cannot be fetched, output only a provisional stock pool and mark ranking confidence as low.
 6. Do not recommend any trade without stop conditions, position cap, invalidation criteria, 1R, and reward-R.

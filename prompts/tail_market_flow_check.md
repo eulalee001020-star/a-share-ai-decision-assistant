@@ -11,8 +11,8 @@ This automation is separate from the 13:10 afternoon check. The 13:10 workflow p
 3. Prediction log path when predictions are written: `reports/predictions/{YYYY-MM-DD}-1430-market-flow-predictions.jsonl`.
 4. Read, in order:
    - `README.md`
-   - `config/portfolio.json`
-   - `docs/trading_assistant_state.md`
+   - `config/portfolio.json` and `docs/trading_assistant_state.md` when they exist in a private local run
+   - `config/portfolio.example.json` and `docs/trading_assistant_state.example.md` in the public portfolio repository
    - `docs/trading_system_upgrade.md`
    - `docs/data_sources.md`
    - `docs/opening_permission_model.md`

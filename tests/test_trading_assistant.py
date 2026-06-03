@@ -588,7 +588,10 @@ class TradingAssistantTests(unittest.TestCase):
             config_dir.mkdir(parents=True)
             reports_dir.mkdir(parents=True)
             sector_dir.mkdir(parents=True)
-            (config_dir / "portfolio.json").write_text((ROOT / "config" / "portfolio.json").read_text(encoding="utf-8"), encoding="utf-8")
+            (config_dir / "portfolio.example.json").write_text(
+                (ROOT / "config" / "portfolio.example.json").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
             (reports_dir / "2026-06-02-1430-tail-data.json").write_text(
                 json.dumps(
                     {

@@ -7,7 +7,7 @@ This automation is no longer a market-summary report. It must produce scenario c
 ## Run Context
 
 1. Default run time: Asia/Shanghai or Asia/Singapore 09:28, after 09:15-09:25 call auction has ended.
-2. Use `config/portfolio.json`, `docs/trading_assistant_state.md`, `docs/trading_system_upgrade.md`, `docs/data_sources.md`, `docs/opening_permission_model.md`, `docs/prediction_automation_system.md`, the 09:28 run packet, user screenshots, local Tonghuashun-readable information, and collector output when available.
+2. Use `config/portfolio.json` and `docs/trading_assistant_state.md` when they exist in a private local run. In the public portfolio repository, use `config/portfolio.example.json` and `docs/trading_assistant_state.example.md` instead. Always load `docs/trading_system_upgrade.md`, `docs/data_sources.md`, `docs/opening_permission_model.md`, `docs/prediction_automation_system.md`, the 09:28 run packet, user screenshots, local Tonghuashun-readable information, and collector output when available.
 3. Do not read or wait for 08:55 or 09:10 morning reports.
 4. If A2 auction data is missing, do not infer auction strength from prior close. Downgrade output to a 09:30-09:35 confirmation checklist and explicitly prohibit 09:28 chase-strength plans.
 5. All conclusions must separate facts, inference, probabilities, and trading plan.

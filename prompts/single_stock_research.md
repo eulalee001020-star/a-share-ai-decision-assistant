@@ -38,7 +38,7 @@ This only restores B1 sector-flow context. It does not replace A1 quote/minute/V
 
 Before any buy/add/hold conclusion:
 
-1. Load `docs/trading_system_upgrade.md` and `config.portfolio.risk_engine`.
+1. Load `docs/trading_system_upgrade.md` and `config.portfolio.risk_engine`. In the public portfolio repository, use `config/portfolio.example.json`; in a private local run, use `config/portfolio.json` when available.
 2. Classify the current market regime: 强进攻日、轮动日、退潮日、冰点修复日、or 混沌日.
 3. Check whether the user's current total position is above the regime cap.
 4. Define 1R, structural stop, target reward-R, and "do not trade if" condition.
